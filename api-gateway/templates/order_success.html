@@ -1,0 +1,56 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Đặt hàng thành công | BookStore{% endblock %}
+
+{% block content %}
+  <section class="hero mb-4">
+    <h2 class="mb-2">Đặt hàng thành công</h2>
+    <p class="muted">Mã đơn hàng: #{{ order.id }}</p>
+  </section>
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card-surface p-4">
+        <h5 class="mb-3">Chi tiết đơn hàng</h5>
+        {% if order.items %}
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead>
+                <tr>
+                  <th>Sách</th>
+                  <th>Số lượng</th>
+                  <th>Đơn giá</th>
+                  <th>Thành tiền</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in order.items %}
+                  <tr>
+                    <td>{{ item.title }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>${{ item.unit_price }}</td>
+                    <td>${{ item.line_total }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="muted">Không có dữ liệu chi tiết cho đơn hàng này.</p>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card-surface p-4">
+        <h5 class="mb-3">Trạng thái</h5>
+        <ul class="mb-3">
+          <li>Thanh toán: {{ order.payment_status|default:"pending" }}</li>
+          <li>Vận chuyển: {{ order.shipping_status|default:"pending" }}</li>
+          <li>Trạng thái đơn: {{ order.status|default:"processing" }}</li>
+        </ul>
+        <div class="fs-5 fw-bold">Tổng tiền: ${{ order.total_amount }}</div>
+        <a class="btn btn-outline-secondary mt-3" href="{% url 'home' %}">Quay lại trang chủ</a>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,87 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Thanh toán | BookStore{% endblock %}
+
+{% block content %}
+  <section class="hero mb-4">
+    <h2 class="mb-2">Đặt hàng</h2>
+    <p class="muted">Xác nhận đơn hàng, chọn thanh toán và vận chuyển.</p>
+  </section>
+
+  {% if cart_items %}
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <div class="card-surface p-4 mb-4">
+          <h5 class="mb-3">Bước 1: Xác nhận sản phẩm</h5>
+          <div class="table-responsive">
+            <table class="table align-middle">
+              <thead>
+                <tr>
+                  <th>Sách</th>
+                  <th>Số lượng</th>
+                  <th>Giá</th>
+                  <th>Tạm tính</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in cart_items %}
+                  <tr>
+                    <td>{{ item.book.title|default:"Book" }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>${{ item.book.price|default_if_none:0 }}</td>
+                    <td>${{ item.line_total|floatformat:2 }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="text-end fw-bold">Tổng: ${{ total|floatformat:2 }}</div>
+        </div>
+
+        <div class="card-surface p-4">
+          <h5 class="mb-3">Bước 2-3: Thanh toán & vận chuyển</h5>
+          <form method="post" class="row g-3">
+            {% csrf_token %}
+            <div class="col-12">
+              <label class="form-label">Địa chỉ giao hàng</label>
+              <input name="shipping_address" class="form-control" placeholder="Số nhà, đường, quận/huyện" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Phương thức thanh toán</label>
+              <select name="payment_method" class="form-select">
+                {% for option in payment_methods %}
+                  <option value="{{ option.value }}">{{ option.label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Phương thức vận chuyển</label>
+              <select name="shipping_method" class="form-select">
+                {% for option in shipping_methods %}
+                  <option value="{{ option.value }}">{{ option.label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-12">
+              <button class="btn btn-accent" type="submit">Đặt hàng</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="card-surface p-4">
+          <h5 class="mb-3">Bước 4: Xác nhận</h5>
+          <p class="muted">Sau khi đặt hàng, hệ thống sẽ gọi pay-service và ship-service để hoàn tất đơn.</p>
+          <ul class="mb-0">
+            <li>Thanh toán online được mô phỏng.</li>
+            <li>Trạng thái đơn hàng sẽ hiển thị ngay sau khi đặt.</li>
+            <li>Giỏ hàng sẽ được xoá khi đơn hàng thành công.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-info">Giỏ hàng trống. Hãy thêm sách trước khi thanh toán.</div>
+    <a class="btn btn-brand" href="{% url 'home' %}">Quay lại trang chủ</a>
+  {% endif %}
+{% endblock %}

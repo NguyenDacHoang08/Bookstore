@@ -1,0 +1,84 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Quản lý sách | BookStore{% endblock %}
+
+{% block content %}
+  <section class="hero mb-4">
+    <h2 class="mb-2">Quản lý sách (Staff)</h2>
+  </section>
+
+  <div class="card-surface p-4 mb-4">
+    <h5 class="mb-3">Thêm sách mới</h5>
+    <form method="post" action="{% url 'staff_book_create' %}" class="row g-3">
+      {% csrf_token %}
+      <div class="col-md-4">
+        <label class="form-label">Tiêu đề</label>
+        <input name="title" class="form-control" required>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Tác giả</label>
+        <input name="author" class="form-control" required>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Giá</label>
+        <input name="price" type="number" step="0.01" class="form-control" required>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Tồn kho</label>
+        <input name="stock" type="number" class="form-control" required>
+      </div>
+      <div class="col-md-1 d-flex align-items-end">
+        <button class="btn btn-brand w-100" type="submit">Lưu</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card-surface p-4">
+    <h5 class="mb-3">Danh sách sách</h5>
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tiêu đề</th>
+            <th>Tác giả</th>
+            <th>Giá</th>
+            <th>Tồn kho</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for book in books %}
+            <tr>
+              <td>{{ book.id }}</td>
+              <td>
+                <form id="update-{{ book.id }}" method="post" action="{% url 'staff_book_update' book.id %}">{% csrf_token %}</form>
+                <input name="title" form="update-{{ book.id }}" value="{{ book.title }}" class="form-control form-control-sm" style="min-width: 180px;">
+              </td>
+              <td>
+                <input name="author" form="update-{{ book.id }}" value="{{ book.author }}" class="form-control form-control-sm" style="min-width: 140px;">
+              </td>
+              <td>
+                <input name="price" form="update-{{ book.id }}" type="number" step="0.01" value="{{ book.price }}" class="form-control form-control-sm" style="max-width: 120px;">
+              </td>
+              <td>
+                <input name="stock" form="update-{{ book.id }}" type="number" value="{{ book.stock }}" class="form-control form-control-sm" style="max-width: 100px;">
+              </td>
+              <td class="d-flex gap-2 flex-wrap">
+                <button class="btn btn-outline-secondary btn-sm" type="submit" form="update-{{ book.id }}">Cập nhật</button>
+                <form method="post" action="{% url 'staff_book_delete' book.id %}">
+                  {% csrf_token %}
+                  <button class="btn btn-outline-danger btn-sm" type="submit">Xoá</button>
+                </form>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6" class="muted">Chưa có sách nào.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

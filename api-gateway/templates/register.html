@@ -1,0 +1,48 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Đăng ký | BookStore{% endblock %}
+
+{% block content %}
+  <section class="hero">
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <h2 class="mb-2">Tạo tài khoản khách hàng</h2>
+        <form method="post" class="row g-3 mt-3">
+          {% csrf_token %}
+          <div class="col-12">
+            <label class="form-label">Họ và tên</label>
+            <input name="name" class="form-control" placeholder="Nguyễn Văn A" required>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Email</label>
+            <input name="email" type="email" class="form-control" placeholder="email@domain.com" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Mật khẩu</label>
+            <input name="password" type="password" class="form-control" placeholder="Tối thiểu 6 ký tự">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Xác nhận mật khẩu</label>
+            <input name="confirm_password" type="password" class="form-control" placeholder="Nhập lại mật khẩu">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Địa chỉ</label>
+            <input name="address" class="form-control" placeholder="Số nhà, đường, quận/huyện">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Số điện thoại (tuỳ chọn)</label>
+            <input name="phone" class="form-control" placeholder="0909 123 456">
+          </div>
+          <div class="col-12 d-flex gap-2">
+            <button class="btn btn-brand" type="submit">Đăng ký</button>
+            <a class="btn btn-outline-secondary" href="{% url 'login' %}">Đã có tài khoản?</a>
+          </div>
+        </form>
+      </div>
+      <div class="col-lg-6">
+        <div class="card-surface p-4 h-100">
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}

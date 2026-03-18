@@ -1,0 +1,102 @@
+﻿{% extends "base.html" %}
+
+{% block title %}{{ book.title }} | BookStore{% endblock %}
+
+{% block content %}
+  <section class="hero mb-4">
+    <div class="row g-4 align-items-center">
+      <div class="col-lg-8">
+        <h2 class="mb-1">{{ book.title }}</h2>
+        <p class="muted mb-2">{{ book.author }}</p>
+        <div class="d-flex gap-3 flex-wrap">
+          <span class="badge badge-soft">Giá ${{ book.price }}</span>
+          <span class="badge badge-soft">Tồn kho {{ book.stock }}</span>
+          <span class="badge badge-soft">★ {{ book.rating_avg|default_if_none:0|floatformat:1 }}</span>
+        </div>
+      </div>
+      <div class="col-lg-4 text-lg-end">
+        {% if customer_id %}
+          <form method="post" action="{% url 'add_to_cart' %}" class="d-inline-flex gap-2">
+            {% csrf_token %}
+            <input type="hidden" name="book_id" value="{{ book.id }}">
+            <input type="hidden" name="customer_id" value="{{ customer_id }}">
+            <input name="quantity" type="number" min="1" value="1" class="form-control form-control-sm" style="width: 80px;">
+            <button class="btn btn-brand btn-sm" type="submit">Thêm vào giỏ</button>
+          </form>
+        {% else %}
+          <a class="btn btn-brand" href="{% url 'login' %}">Đăng nhập để mua</a>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card-surface p-4">
+        <h5 class="mb-3">Đánh giá từ khách hàng</h5>
+        {% if ratings %}
+          {% for rating in ratings %}
+            <div class="border-bottom pb-3 mb-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <strong>Khách #{{ rating.customer_id|default:"Ẩn danh" }}</strong>
+                <span class="badge bg-warning-subtle text-warning">★ {{ rating.rating }}</span>
+              </div>
+              <p class="mb-1 mt-2">{{ rating.comment|default:"" }}</p>
+              <small class="muted">{{ rating.created_at }}</small>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="muted">Chưa có đánh giá nào cho sách này.</p>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card-surface p-4">
+        <h5 class="mb-3">Gửi đánh giá</h5>
+        {% if customer_id %}
+          <form method="post" action="{% url 'rate_book' book.id %}">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label">Số sao</label>
+              <select name="rating" class="form-select" required>
+                <option value="5">5 - Tuyệt vời</option>
+                <option value="4">4 - Rất tốt</option>
+                <option value="3">3 - Tốt</option>
+                <option value="2">2 - Khá</option>
+                <option value="1">1 - Chưa hài lòng</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Bình luận</label>
+              <textarea name="comment" class="form-control" rows="4" placeholder="Cảm nhận của bạn..."></textarea>
+            </div>
+            <button class="btn btn-brand" type="submit">Gửi đánh giá</button>
+          </form>
+        {% else %}
+          <p class="muted">Bạn cần đăng nhập để đánh giá.</p>
+          <a class="btn btn-brand" href="{% url 'login' %}">Đăng nhập</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <section class="mt-5">
+    <h4>Sách gợi ý</h4>
+    <div class="row g-3">
+      {% for rec in recommendations %}
+        <div class="col-md-4 col-sm-6">
+          <div class="card h-100">
+            <div class="card-body">
+              <h6 class="card-title">{{ rec.title }}</h6>
+              <p class="card-text">{{ rec.author }}</p>
+              <p class="card-text">Giá: ${{ rec.price }}</p>
+              <a href="{% url 'book_detail' rec.id %}" class="btn btn-sm btn-outline-primary">Xem chi tiết</a>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <p>Không có sách gợi ý.</p>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}
