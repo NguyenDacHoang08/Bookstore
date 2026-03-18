@@ -90,7 +90,11 @@
               <h6 class="card-title">{{ rec.title }}</h6>
               <p class="card-text">{{ rec.author }}</p>
               <p class="card-text">Giá: ${{ rec.price }}</p>
-              <a href="{% url 'book_detail' rec.id %}" class="btn btn-sm btn-outline-primary">Xem chi tiết</a>
+              {% if rec.id %}
+                <a href="{% url 'book_detail' rec.id %}" class="btn btn-sm btn-outline-primary">Xem chi tiết</a>
+              {% else %}
+                <span class="text-muted">Không có chi tiết</span>
+              {% endif %}
             </div>
           </div>
         </div>

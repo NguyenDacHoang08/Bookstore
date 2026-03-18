@@ -2,9 +2,10 @@
 
 WORKDIR /app
 
-COPY . /app
+COPY requirements.txt /app/
+RUN pip install -r requirements.txt
 
-RUN pip install django djangorestframework requests
+COPY . /app
 
 EXPOSE 8000
 

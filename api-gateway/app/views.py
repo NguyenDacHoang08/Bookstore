@@ -406,6 +406,8 @@ def delete_cart_item(request, item_id):
 
 
 def book_detail(request, book_id):
+    customer_id = _get_customer_id(request)
+    
     try:
         book_response = requests.get(
             f"{BOOK_SERVICE_URL}/books/{book_id}/",
@@ -437,11 +439,16 @@ def book_detail(request, book_id):
     try:
         recommend_response = requests.get(
             f"{SERVICE_URLS['recommend']}/recommend/{book_id}/",
+            params={"user_id": customer_id} if customer_id else {},
             timeout=3,
         )
         recommendations = _safe_json(recommend_response) or []
     except requests.RequestException:
         recommendations = []
+
+    # Avoid passing invalid IDs into the template url tag (Django will raise NoReverseMatch).
+    if isinstance(recommendations, list):
+        recommendations = [r for r in recommendations if isinstance(r, dict) and r.get("id")]
 
     context = {
         **_base_context(request),
