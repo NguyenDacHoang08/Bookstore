@@ -668,6 +668,7 @@ def staff_book_create(request):
         "author": request.POST.get("author", "").strip(),
         "price": request.POST.get("price", "").strip(),
         "stock": request.POST.get("stock", "").strip(),
+        "image_url": request.POST.get("image_url", "").strip(),
     }
 
     try:
@@ -701,6 +702,7 @@ def staff_book_update(request, book_id):
         "author": request.POST.get("author", "").strip(),
         "price": request.POST.get("price", "").strip(),
         "stock": request.POST.get("stock", "").strip(),
+        "image_url": request.POST.get("image_url", "").strip(),
     }
 
     try:

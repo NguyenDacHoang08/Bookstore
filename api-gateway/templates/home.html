@@ -39,31 +39,53 @@
 
   <div class="row g-4">
     {% for book in books %}
-      <div class="col-md-6 col-lg-4">
-        <div class="card-surface p-3 h-100 d-flex flex-column">
-          <div class="d-flex justify-content-between align-items-start mb-2">
-            <span class="badge badge-soft">Stock {{ book.stock }}</span>
-            <span class="text-muted">#{{ book.id }}</span>
-          </div>
-          <h5 class="mb-1">{{ book.title }}</h5>
-          <p class="muted mb-2">{{ book.author }}</p>
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <strong>${{ book.price }}</strong>
-            <span class="muted">★ {{ book.rating_avg|default_if_none:0|floatformat:1 }}</span>
-          </div>
-          <div class="mt-auto">
-            <div class="d-flex gap-2 flex-wrap">
-              <a class="btn btn-outline-secondary btn-sm" href="{% url 'book_detail' book.id %}">Xem chi tiết</a>
+      <div class="col-md-6 col-lg-4 col-xl-3">
+        <div class="book-card h-100">
+          <a href="{% url 'book_detail' book.id %}" class="book-image-link">
+            {% if book.image_url %}
+              <img src="{{ book.image_url }}" alt="{{ book.title }}" class="book-image">
+            {% else %}
+              <div class="book-image-placeholder">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z"/>
+                </svg>
+              </div>
+            {% endif %}
+            <div class="book-badge-container">
+              <span class="badge badge-stock">Còn {{ book.stock }}</span>
+            </div>
+          </a>
+          <div class="book-content">
+            <a href="{% url 'book_detail' book.id %}" class="book-title-link">
+              <h5 class="book-title">{{ book.title }}</h5>
+            </a>
+            <p class="book-author">{{ book.author }}</p>
+            <div class="book-meta">
+              <div class="book-price">${{ book.price }}</div>
+              <div class="book-rating">
+                <span class="star">★</span>
+                <span>{{ book.rating_avg|default_if_none:0|floatformat:1 }}</span>
+                <span class="rating-count">({{ book.rating_count|default_if_none:0 }})</span>
+              </div>
+            </div>
+            <div class="book-actions">
               {% if customer_id %}
-                <form method="post" action="{% url 'add_to_cart' %}" class="d-flex gap-2 flex-wrap">
+                <form method="post" action="{% url 'add_to_cart' %}" class="add-to-cart-form">
                   {% csrf_token %}
                   <input type="hidden" name="book_id" value="{{ book.id }}">
                   <input type="hidden" name="customer_id" value="{{ customer_id }}">
-                  <input name="quantity" type="number" min="1" value="1" class="form-control form-control-sm" style="width: 80px;">
-                  <button class="btn btn-brand btn-sm" type="submit">Thêm vào giỏ</button>
+                  <div class="quantity-selector">
+                    <input name="quantity" type="number" min="1" value="1" class="quantity-input">
+                  </div>
+                  <button class="btn-add-cart" type="submit">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                    </svg>
+                    Thêm vào giỏ
+                  </button>
                 </form>
               {% else %}
-                <a class="btn btn-brand btn-sm" href="{% url 'login' %}">Đăng nhập để mua</a>
+                <a class="btn-login" href="{% url 'login' %}">Đăng nhập để mua</a>
               {% endif %}
             </div>
           </div>
