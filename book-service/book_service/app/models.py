@@ -6,3 +6,4 @@ class Book(models.Model):
     stock = models.IntegerField()
     rating_avg = models.FloatField(default=0)
     rating_count = models.IntegerField(default=0)
+    image_url = models.URLField(blank=True, null=True)

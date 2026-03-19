@@ -15,53 +15,75 @@ DEFAULT_TIMEOUT = 5
 
 BOOKS = [
     {
-        "title": "Service Patterns 101",
-        "author": "Lea Nguyen",
-        "price": "15.90",
-        "stock": 40,
+        "title": "Dạy Con Yêu Thương",
+        "author": "Như Hương",
+        "price": "189000",
+        "stock": 50,
+        "image_url": "https://images-na.ssl-images-amazon.com/images/P/B08K2XZPPZ.01.L.jpg"
     },
     {
-        "title": "Gateway Design",
-        "author": "Minh Pham",
-        "price": "19.50",
-        "stock": 22,
-    },
-    {
-        "title": "Eventful Retail",
-        "author": "Quang Tran",
-        "price": "12.75",
+        "title": "Tâm Lý Học Tối Giản",
+        "author": "Sabaa Tahir",
+        "price": "220000",
         "stock": 35,
+        "image_url": "https://images-na.ssl-images-amazon.com/images/P/B071L7QG8X.01.L.jpg"
     },
     {
-        "title": "Data Consistency",
-        "author": "An Ho",
-        "price": "18.25",
-        "stock": 15,
+        "title": "Thói Quen Nguyên Tử",
+        "author": "James Clear",
+        "price": "198000",
+        "stock": 60,
+        "image_url": "https://images-na.ssl-images-amazon.com/images/P/0735211299.01.L.jpg"
     },
     {
-        "title": "Saga Journeys",
-        "author": "Bao Pham",
-        "price": "21.00",
-        "stock": 18,
+        "title": "Sống Là Để Yêu",
+        "author": "Nguyên Hà",
+        "price": "145000",
+        "stock": 45,
+        "image_url": "https://images-na.ssl-images-amazon.com/images/P/B08MY32NPR.01.L.jpg"
     },
     {
-        "title": "Microservice Security",
-        "author": "Lan Vo",
-        "price": "17.80",
-        "stock": 25,
+        "title": "Khí Chất Con Người",
+        "author": "Tường Vân",
+        "price": "175000",
+        "stock": 40,
+        "image_url": "https://images-na.ssl-images-amazon.com/images/P/B07ZPFQVLC.01.L.jpg"
     },
     {
-        "title": "Scaling Django",
-        "author": "Hieu Le",
-        "price": "16.40",
+        "title": "Cuộc Sống Ý Nghĩa",
+        "author": "Viktor Frankl",
+        "price": "165000",
+        "stock": 55,
+        "image_url": "https://images-na.ssl-images-amazon.com/images/P/0807014312.01.L.jpg"
+    },
+    {
+        "title": "Sức Mạnh Của Hiện Tại",
+        "author": "Eckhart Tolle",
+        "price": "205000",
         "stock": 30,
+        "image_url": "https://images-na.ssl-images-amazon.com/images/P/1577314808.01.L.jpg"
     },
     {
-        "title": "Async Python in Practice",
-        "author": "Thuy Pham",
-        "price": "14.20",
-        "stock": 28,
+        "title": "Tư Duy Nước Ngoài",
+        "author": "Thích Nhất Hạnh",
+        "price": "155000",
+        "stock": 70,
+        "image_url": "https://images-na.ssl-images-amazon.com/images/P/B00YG2U8UQ.01.L.jpg"
     },
+    {
+        "title": "Biến Bạn Thành Nhân Vật",
+        "author": "Robin Sharma",
+        "price": "189000",
+        "stock": 42,
+        "image_url": "https://images-na.ssl-images-amazon.com/images/P/1401952216.01.L.jpg"
+    },
+    {
+        "title": "Trí Tuệ Cảm Xúc",
+        "author": "Daniel Goleman",
+        "price": "210000",
+        "stock": 38,
+        "image_url": "https://images-na.ssl-images-amazon.com/images/P/055338371X.01.L.jpg"
+    }
 ]
 
 CUSTOMERS = [

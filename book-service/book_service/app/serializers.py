@@ -11,5 +11,6 @@ class BookSerializer(serializers.ModelSerializer):
             'stock',
             'rating_avg',
             'rating_count',
+            'image_url',
         )
         read_only_fields = ('rating_avg', 'rating_count')
