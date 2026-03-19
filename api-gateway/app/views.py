@@ -230,63 +230,57 @@ def login_view(request):
                 messages.error(request, "Vui lòng nhập mật khẩu.")
                 return render(request, "login.html", {**_base_context(request)})
 
-            # First try staff login (default staff account)
+            # First try staff login with JWT
             try:
-                response = requests.get(
-                    f"{STAFF_SERVICE_URL}/staffs/",
+                response = requests.post(
+                    f"{STAFF_SERVICE_URL}/login/",
+                    json={"email": email, "password": password},
                     timeout=3,
                 )
             except requests.RequestException:
                 response = None
 
             if response and response.status_code == 200:
-                staffs = _safe_json(response) or []
-                match = next(
-                    (staff for staff in staffs if staff.get("email", "").lower() == email),
-                    None,
-                )
-                if match:
-                    if password and not check_password(password, match.get("password", "")):
-                        messages.error(request, "Mật khẩu không đúng.")
-                        return render(request, "login.html", {**_base_context(request)})
-
-                    _set_customer_session(request, match)
+                staff_data = _safe_json(response) or {}
+                if staff_data:
+                    request.session["customer_id"] = staff_data.get("id")
+                    request.session["customer_name"] = staff_data.get("name", "")
                     request.session["is_staff"] = True
+                    request.session["access_token"] = staff_data.get("access")
+                    request.session["refresh_token"] = staff_data.get("refresh")
+                    request.session["user_type"] = "staff"
                     messages.success(request, "Đăng nhập staff thành công.")
                     next_url = request.GET.get("next") or reverse("staff_books")
                     return redirect(next_url)
 
-            # Fall back to customer login
+            # Fall back to customer login with JWT
             try:
-                response = requests.get(
-                    f"{CUSTOMER_SERVICE_URL}/customers/",
+                response = requests.post(
+                    f"{CUSTOMER_SERVICE_URL}/login/",
+                    json={"email": email, "password": password},
                     timeout=3,
                 )
             except requests.RequestException:
                 messages.error(request, "customer-service unavailable")
                 return render(request, "login.html", {**_base_context(request)})
 
-            if response.status_code != 200:
-                messages.error(request, "customer-service unavailable")
-                return render(request, "login.html", {**_base_context(request)})
-
-            customers = _safe_json(response) or []
-            match = next(
-                (customer for customer in customers if customer.get("email", "").lower() == email),
-                None,
-            )
-            if not match:
-                messages.error(request, "Không tìm thấy tài khoản.")
-                return render(request, "login.html", {**_base_context(request)})
-
-            if password and not check_password(password, match.get("password", "")):
-                messages.error(request, "Mật khẩu không đúng.")
-                return render(request, "login.html", {**_base_context(request)})
-
-            _set_customer_session(request, match)
-            messages.success(request, "Đăng nhập thành công.")
-            next_url = request.GET.get("next") or reverse("home")
-            return redirect(next_url)
+            if response.status_code == 200:
+                customer_data = _safe_json(response) or {}
+                if customer_data:
+                    request.session["customer_id"] = customer_data.get("id")
+                    request.session["customer_name"] = customer_data.get("name", "")
+                    request.session["is_staff"] = False
+                    request.session["access_token"] = customer_data.get("access")
+                    request.session["refresh_token"] = customer_data.get("refresh")
+                    request.session["user_type"] = "customer"
+                    messages.success(request, "Đăng nhập thành công.")
+                    next_url = request.GET.get("next") or reverse("home")
+                    return redirect(next_url)
+            
+            error_response = _safe_json(response)
+            error_msg = error_response.get("error") if isinstance(error_response, dict) else "Không tìm thấy tài khoản hoặc mật khẩu không đúng."
+            messages.error(request, error_msg)
+            return render(request, "login.html", {**_base_context(request)})
 
         messages.error(request, "Vui lòng nhập email và mật khẩu.")
 
@@ -297,6 +291,9 @@ def logout_view(request):
     request.session.pop("customer_id", None)
     request.session.pop("customer_name", None)
     request.session.pop("is_staff", None)
+    request.session.pop("access_token", None)
+    request.session.pop("refresh_token", None)
+    request.session.pop("user_type", None)
     messages.success(request, "Đã đăng xuất.")
     return redirect("home")
 
@@ -756,6 +753,65 @@ def _proxy_headers(request):
             continue
         headers[key] = value
     return headers
+
+
+@csrf_exempt
+def api_login(request):
+    """API endpoint for JWT login (JSON POST)"""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+    
+    import json
+    try:
+        data = json.loads(request.body)
+    except (json.JSONDecodeError, ValueError):
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    
+    email = data.get("email", "").strip().lower()
+    password = data.get("password", "").strip()
+    
+    if not email or not password:
+        return JsonResponse({"error": "Email and password required"}, status=400)
+    
+    # Try staff login first
+    try:
+        response = requests.post(
+            f"{STAFF_SERVICE_URL}/login/",
+            json={"email": email, "password": password},
+            timeout=3,
+        )
+    except requests.RequestException:
+        response = None
+    
+    if response and response.status_code == 200:
+        staff_data = _safe_json(response) or {}
+        return JsonResponse({
+            "success": True,
+            "user_type": "staff",
+            "data": staff_data
+        })
+    
+    # Fall back to customer login
+    try:
+        response = requests.post(
+            f"{CUSTOMER_SERVICE_URL}/login/",
+            json={"email": email, "password": password},
+            timeout=3,
+        )
+    except requests.RequestException:
+        return JsonResponse({"error": "customer-service unavailable"}, status=503)
+    
+    if response.status_code == 200:
+        customer_data = _safe_json(response) or {}
+        return JsonResponse({
+            "success": True,
+            "user_type": "customer",
+            "data": customer_data
+        })
+    
+    error_response = _safe_json(response) or {}
+    error_msg = error_response.get("error", "Invalid credentials")
+    return JsonResponse({"error": error_msg}, status=401)
 
 
 @csrf_exempt

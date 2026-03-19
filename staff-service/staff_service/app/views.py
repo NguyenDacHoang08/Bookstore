@@ -1,6 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth.hashers import check_password
 from .models import Staff
 from .serializers import StaffSerializer
 import requests
@@ -28,6 +30,50 @@ class StaffListCreate(APIView):
             staff = serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class StaffLoginView(APIView):
+    def post(self, request):
+        email = request.data.get('email', '').strip()
+        password = request.data.get('password', '').strip()
+        
+        if not email or not password:
+            return Response(
+                {'error': 'Email and password are required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            staff = Staff.objects.get(email=email)
+        except Staff.DoesNotExist:
+            return Response(
+                {'error': 'Staff not found'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        if not check_password(password, staff.password):
+            return Response(
+                {'error': 'Invalid password'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        # Generate JWT tokens
+        refresh = RefreshToken()
+        refresh['email'] = staff.email
+        refresh['staff_id'] = staff.id
+        refresh['user_type'] = 'staff'
+        refresh['role'] = staff.role
+        refresh['name'] = staff.name
+        
+        return Response({
+            'id': staff.id,
+            'email': staff.email,
+            'name': staff.name,
+            'role': staff.role,
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'user_type': 'staff'
+        }, status=status.HTTP_200_OK)
 
 
 def _proxy_book_service(method, path, request):

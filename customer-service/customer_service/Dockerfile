@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY . /app
 
-RUN pip install django djangorestframework requests
+RUN pip install django djangorestframework djangorestframework-simplejwt requests
 
 EXPOSE 8000
 
