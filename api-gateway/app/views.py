@@ -544,6 +544,7 @@ def checkout(request):
                     "order": order,
                     "cart_items": cart_items,
                     "total": total,
+                    "just_created": True,
                 }
                 return render(request, "order_success.html", context)
 
@@ -571,6 +572,34 @@ def checkout(request):
     return render(request, "checkout.html", context)
 
 
+def orders(request):
+    customer_id = _get_customer_id(request)
+    if not customer_id:
+        messages.error(request, "Vui lòng đăng nhập để xem đơn hàng.")
+        return redirect("login")
+
+    try:
+        response = requests.get(
+            f"{ORDER_SERVICE_URL}/orders/",
+            params={"customer_id": customer_id},
+            timeout=3,
+        )
+    except requests.RequestException:
+        messages.error(request, "order-service unavailable")
+        return redirect("home")
+
+    if response.status_code != 200:
+        messages.error(request, "Không thể lấy danh sách đơn hàng.")
+        return redirect("home")
+
+    orders = _safe_json(response) or []
+    context = {
+        **_base_context(request),
+        "orders": orders,
+    }
+    return render(request, "orders.html", context)
+
+
 def order_success(request, order_id):
     try:
         response = requests.get(
@@ -586,9 +615,20 @@ def order_success(request, order_id):
         return redirect("home")
 
     order = _safe_json(response) or {}
+    customer_id = _get_customer_id(request)
+    if customer_id:
+        try:
+            order_customer_id = int(order.get("customer_id"))
+        except (TypeError, ValueError):
+            order_customer_id = None
+        if order_customer_id != customer_id:
+            messages.error(request, "Không tìm thấy đơn hàng.")
+            return redirect("home")
+
     context = {
         **_base_context(request),
         "order": order,
+        "just_created": False,
     }
     return render(request, "order_success.html", context)
 

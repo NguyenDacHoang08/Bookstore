@@ -113,6 +113,7 @@
           {% if customer_id %}
           <li class="nav-item"><a class="nav-link" href="{% url 'cart' %}">Giỏ hàng</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'checkout' %}">Thanh toán</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'orders' %}">Đơn hàng</a></li>
           {% endif %}
           {% if is_staff %}
           <li class="nav-item"><a class="nav-link" href="{% url 'staff_books' %}">Quản lý sách</a></li>
@@ -120,7 +121,7 @@
         </ul>
         <div class="d-flex align-items-center gap-2">
           {% if customer_id %}
-            <span class="nav-pill">Welcome</span>
+            <span class="nav-pill">Xin chào, {{ customer_name|default:"Khách" }}</span>
           {% endif %}
           {% if not customer_id and not is_staff %}
             <a class="btn btn-sm btn-outline-secondary" href="{% url 'login' %}">Đăng nhập</a>

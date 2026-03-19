@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Đơn hàng của bạn | BookStore{% endblock %}
+
+{% block content %}
+  <section class="hero mb-4">
+    <h2 class="mb-2">Đơn hàng của bạn</h2>
+    <p class="muted">Xem trạng thái và chi tiết các đơn hàng đã đặt.</p>
+  </section>
+
+  {% if orders %}
+    <div class="card-surface p-4">
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>Mã</th>
+              <th>Ngày</th>
+              <th>Tổng tiền</th>
+              <th>Trạng thái</th>
+              <th>Thanh toán</th>
+              <th>Vận chuyển</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in orders %}
+              <tr>
+                <td><a href="{% url 'order_success' order.id %}">#{{ order.id }}</a></td>
+                <td>{{ order.created_at }}</td>
+                <td>${{ order.total_amount }}</td>
+                <td>{{ order.status|default:"processing" }}</td>
+                <td>{{ order.payment_status|default:"pending" }}</td>
+                <td>{{ order.shipping_status|default:"pending" }}</td>
+                <td>
+                  <a class="btn btn-sm btn-outline-secondary" href="{% url 'order_success' order.id %}">Xem</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-info">Bạn chưa có đơn hàng nào.</div>
+    <a class="btn btn-brand" href="{% url 'home' %}">Mua sắm ngay</a>
+  {% endif %}
+{% endblock %}

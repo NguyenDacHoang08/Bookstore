@@ -4,7 +4,9 @@
 
 {% block content %}
   <section class="hero mb-4">
-    <h2 class="mb-2">Đặt hàng thành công</h2>
+    <h2 class="mb-2">
+      {% if just_created %}Đặt hàng thành công{% else %}Chi tiết đơn hàng{% endif %}
+    </h2>
     <p class="muted">Mã đơn hàng: #{{ order.id }}</p>
   </section>
 
@@ -50,6 +52,7 @@
         </ul>
         <div class="fs-5 fw-bold">Tổng tiền: ${{ order.total_amount }}</div>
         <a class="btn btn-outline-secondary mt-3" href="{% url 'home' %}">Quay lại trang chủ</a>
+        <a class="btn btn-outline-secondary mt-3" href="{% url 'orders' %}">Xem danh sách đơn hàng</a>
       </div>
     </div>
   </div>

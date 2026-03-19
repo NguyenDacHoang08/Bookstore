@@ -44,6 +44,24 @@ BOOKS = [
         "price": "21.00",
         "stock": 18,
     },
+    {
+        "title": "Microservice Security",
+        "author": "Lan Vo",
+        "price": "17.80",
+        "stock": 25,
+    },
+    {
+        "title": "Scaling Django",
+        "author": "Hieu Le",
+        "price": "16.40",
+        "stock": 30,
+    },
+    {
+        "title": "Async Python in Practice",
+        "author": "Thuy Pham",
+        "price": "14.20",
+        "stock": 28,
+    },
 ]
 
 CUSTOMERS = [
@@ -205,25 +223,30 @@ def seed_ratings(customers, books):
     if not customers or not books:
         return
 
-    ratings_payloads = [
-        {
-            "book_id": books[0].get("id"),
-            "customer_id": customers[0].get("id"),
-            "rating": 5,
-            "comment": "Great starter for microservices.",
-        },
-        {
-            "book_id": books[1].get("id"),
-            "customer_id": customers[0].get("id"),
-            "rating": 4,
-            "comment": "Clear and practical UI gateway tips.",
-        },
+    customer = customers[0]
+    comments = [
+        "Great starter for microservices.",
+        "Clear and practical UI gateway tips.",
+        "Useful patterns and examples.",
+        "Well explained and approachable.",
+        "In-depth and practical.",
+        "Excellent coverage of security.",
+        "Perfect for scaling Django apps.",
+        "Async patterns made simple.",
     ]
 
     created = 0
-    for payload in ratings_payloads:
+    for idx, book in enumerate(books):
+        payload = {
+            "book_id": book.get("id"),
+            "customer_id": customer.get("id"),
+            "rating": 5 - (idx % 3),
+            "comment": comments[idx % len(comments)],
+        }
+
         if rating_exists(payload["book_id"], payload["customer_id"]):
             continue
+
         status, _ = request_json(
             "POST",
             f"{RATE_SERVICE_URL}/books/{payload['book_id']}/rate/",
