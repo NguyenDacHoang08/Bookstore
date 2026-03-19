@@ -19,14 +19,14 @@ BOOKS = [
         "author": "Như Hương",
         "price": "189000",
         "stock": 50,
-        "image_url": "https://images-na.ssl-images-amazon.com/images/P/B08K2XZPPZ.01.L.jpg"
+        "image_url": "https://plus.unsplash.com/premium_photo-1773711129295-942f5ed7c014?q=80&w=717&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     },
     {
         "title": "Tâm Lý Học Tối Giản",
         "author": "Sabaa Tahir",
         "price": "220000",
         "stock": 35,
-        "image_url": "https://images-na.ssl-images-amazon.com/images/P/B071L7QG8X.01.L.jpg"
+        "image_url": "https://plus.unsplash.com/premium_photo-1673290748844-126a4f1a60dd?q=80&w=765&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     },
     {
         "title": "Thói Quen Nguyên Tử",
@@ -40,21 +40,21 @@ BOOKS = [
         "author": "Nguyên Hà",
         "price": "145000",
         "stock": 45,
-        "image_url": "https://images-na.ssl-images-amazon.com/images/P/B08MY32NPR.01.L.jpg"
+        "image_url": "https://images.unsplash.com/photo-1711185901036-f7fd98e50bb1?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     },
     {
         "title": "Khí Chất Con Người",
         "author": "Tường Vân",
         "price": "175000",
         "stock": 40,
-        "image_url": "https://images-na.ssl-images-amazon.com/images/P/B07ZPFQVLC.01.L.jpg"
+        "image_url": "https://images.unsplash.com/photo-1600714226481-1f78bae21075?q=80&w=736&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     },
     {
         "title": "Cuộc Sống Ý Nghĩa",
         "author": "Viktor Frankl",
         "price": "165000",
         "stock": 55,
-        "image_url": "https://images-na.ssl-images-amazon.com/images/P/0807014312.01.L.jpg"
+        "image_url": "https://images.unsplash.com/photo-1594370606841-a3da498dcec8?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     },
     {
         "title": "Sức Mạnh Của Hiện Tại",
@@ -68,7 +68,7 @@ BOOKS = [
         "author": "Thích Nhất Hạnh",
         "price": "155000",
         "stock": 70,
-        "image_url": "https://images-na.ssl-images-amazon.com/images/P/B00YG2U8UQ.01.L.jpg"
+        "image_url": "https://images.unsplash.com/photo-1667964395070-2dd7bd81d914?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     },
     {
         "title": "Biến Bạn Thành Nhân Vật",
@@ -132,21 +132,47 @@ def fetch_list(url):
 
 def seed_books():
     existing = fetch_list(f"{BOOK_SERVICE_URL}/books/")
-    existing_keys = {
-        (str(book.get("title", "")).lower(), str(book.get("author", "")).lower())
+    existing_by_key = {
+        (str(book.get("title", "")).lower(), str(book.get("author", "")).lower()): book
         for book in existing
     }
 
     created = []
+    updated = []
     for book in BOOKS:
         key = (book["title"].lower(), book["author"].lower())
-        if key in existing_keys:
+        existing_book = existing_by_key.get(key)
+
+        # Create if missing
+        if not existing_book:
+            status, data = request_json("POST", f"{BOOK_SERVICE_URL}/books/", book)
+            if status in {200, 201}:
+                created.append(data)
+            else:
+                print("Failed to create book:", book["title"], "status=", status)
             continue
-        status, data = request_json("POST", f"{BOOK_SERVICE_URL}/books/", book)
-        if status in {200, 201}:
-            created.append(data)
-        else:
-            print("Failed to create book:", book["title"], "status=", status)
+
+        # Update existing book if key fields (like image_url) differ
+        updates = {}
+        for field in ("price", "stock", "image_url"):
+            # Normalize to string to compare regardless of type differences
+            if str(existing_book.get(field, "") or "") != str(book.get(field, "") or ""):
+                updates[field] = book.get(field)
+
+        if updates:
+            status, data = request_json(
+                "PATCH",
+                f"{BOOK_SERVICE_URL}/books/{existing_book.get('id')}/",
+                updates,
+            )
+            if status in {200, 201, 204}:
+                updated.append(existing_book.get("id"))
+            else:
+                print("Failed to update book:", book["title"], "status=", status)
+
+    all_books = fetch_list(f"{BOOK_SERVICE_URL}/books/")
+    print(f"Books available: {len(all_books)} (created {len(created)}, updated {len(updated)})")
+    return all_books
 
     all_books = fetch_list(f"{BOOK_SERVICE_URL}/books/")
     print(f"Books available: {len(all_books)} (created {len(created)})")

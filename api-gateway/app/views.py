@@ -446,6 +446,9 @@ def book_detail(request, book_id):
     # Avoid passing invalid IDs into the template url tag (Django will raise NoReverseMatch).
     if isinstance(recommendations, list):
         recommendations = [r for r in recommendations if isinstance(r, dict) and r.get("id")]
+    else:
+        # If the recommendation service returns errors (dict) or unexpected data, ignore it.
+        recommendations = []
 
     context = {
         **_base_context(request),
