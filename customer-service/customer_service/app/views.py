@@ -10,6 +10,7 @@ class CustomerListCreate(APIView):
         serializer = CustomerSerializer(customers, many=True)
         return Response(serializer.data)
     def post(self, request):
+        from rest_framework import status
         serializer = CustomerSerializer(data=request.data)
         if serializer.is_valid():
             customer = serializer.save()
@@ -18,5 +19,5 @@ class CustomerListCreate(APIView):
             f"{CART_SERVICE_URL}/carts/",
                 json={"customer_id": customer.id}
             )
-            return Response(serializer.data)
-        return Response(serializer.errors)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
