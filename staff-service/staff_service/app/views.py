@@ -8,6 +8,7 @@ from .serializers import StaffSerializer
 import requests
 
 BOOK_SERVICE_URL = "http://book-service:8000"
+ORDER_SERVICE_URL = "http://order-service:8000"
 
 
 class Health(APIView):
@@ -134,3 +135,56 @@ class StaffBookDetail(APIView):
 
     def delete(self, request, book_id):
         return _proxy_book_service("delete", f"/books/{book_id}/", request)
+
+
+class StaffOrderList(APIView):
+    def get(self, request):
+        try:
+            response = requests.get(
+                f"{ORDER_SERVICE_URL}/orders/",
+                params=request.query_params,
+                timeout=3,
+            )
+        except requests.RequestException:
+            return Response({"error": "order-service unavailable"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        try:
+            data = response.json()
+        except ValueError:
+            data = {"detail": response.text}
+        return Response(data, status=response.status_code)
+
+
+class StaffOrderApprove(APIView):
+    def patch(self, request, order_id):
+        try:
+            response = requests.patch(
+                f"{ORDER_SERVICE_URL}/orders/{order_id}/approve/",
+                timeout=3,
+            )
+        except requests.RequestException:
+            return Response({"error": "order-service unavailable"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        if response.status_code == status.HTTP_204_NO_CONTENT:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        try:
+            data = response.json()
+        except ValueError:
+            data = {"detail": response.text}
+        return Response(data, status=response.status_code)
+
+
+class StaffOrderDelete(APIView):
+    def delete(self, request, order_id):
+        try:
+            response = requests.delete(
+                f"{ORDER_SERVICE_URL}/orders/{order_id}/",
+                timeout=3,
+            )
+        except requests.RequestException:
+            return Response({"error": "order-service unavailable"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        if response.status_code == status.HTTP_204_NO_CONTENT:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        try:
+            data = response.json()
+        except ValueError:
+            data = {"detail": response.text}
+        return Response(data, status=response.status_code)

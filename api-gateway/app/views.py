@@ -1,4 +1,4 @@
-﻿from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password, check_password
 from django.http import HttpResponse, JsonResponse
@@ -746,6 +746,81 @@ def staff_book_delete(request, book_id):
 
     messages.success(request, "Đã xóa sách.")
     return redirect("staff_books")
+
+
+def staff_orders(request):
+    if not request.session.get("is_staff"):
+        messages.error(request, "Bạn cần đăng nhập staff để quản lý đơn hàng.")
+        return redirect("login")
+
+    orders_list = []
+    try:
+        response = requests.get(
+            f"{STAFF_SERVICE_URL}/orders/",
+            timeout=3,
+        )
+        if response.status_code == 200:
+            orders_list = _safe_json(response) or []
+        else:
+            messages.error(request, "Không thể lấy danh sách đơn hàng.")
+    except requests.RequestException:
+        messages.error(request, "staff-service unavailable")
+
+    context = {
+        **_base_context(request),
+        "orders": orders_list,
+    }
+    return render(request, "staff_orders.html", context)
+
+
+def staff_order_approve(request, order_id):
+    if request.method != "POST":
+        return redirect("staff_orders")
+
+    if not request.session.get("is_staff"):
+        messages.error(request, "Bạn cần đăng nhập staff để quản lý đơn hàng.")
+        return redirect("login")
+
+    try:
+        response = requests.patch(
+            f"{STAFF_SERVICE_URL}/orders/{order_id}/approve/",
+            timeout=3,
+        )
+    except requests.RequestException:
+        messages.error(request, "staff-service unavailable")
+        return redirect("staff_orders")
+
+    if response.status_code not in {200, 204}:
+        messages.error(request, "Không thể duyệt đơn hàng.")
+        return redirect("staff_orders")
+
+    messages.success(request, f"Đã duyệt đơn hàng #{order_id}.")
+    return redirect("staff_orders")
+
+
+def staff_order_delete(request, order_id):
+    if request.method != "POST":
+        return redirect("staff_orders")
+
+    if not request.session.get("is_staff"):
+        messages.error(request, "Bạn cần đăng nhập staff để quản lý đơn hàng.")
+        return redirect("login")
+
+    try:
+        response = requests.delete(
+            f"{STAFF_SERVICE_URL}/orders/{order_id}/",
+            timeout=3,
+        )
+    except requests.RequestException:
+        messages.error(request, "staff-service unavailable")
+        return redirect("staff_orders")
+
+    if response.status_code not in {200, 204}:
+        messages.error(request, "Không thể xóa đơn hàng.")
+        return redirect("staff_orders")
+
+    messages.success(request, f"Đã xóa đơn hàng #{order_id}.")
+    return redirect("staff_orders")
 
 
 def _proxy_headers(request):

@@ -358,3 +358,21 @@ class OrderDetail(APIView):
             return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
         serializer = OrderSerializer(order)
         return Response(serializer.data)
+
+    def delete(self, request, order_id):
+        order = Order.objects.filter(id=order_id).first()
+        if not order:
+            return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
+        order.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class OrderApprove(APIView):
+    def patch(self, request, order_id):
+        order = Order.objects.filter(id=order_id).prefetch_related("items").first()
+        if not order:
+            return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
+        order.status = "confirmed"
+        order.save(update_fields=["status"])
+        serializer = OrderSerializer(order)
+        return Response(serializer.data)

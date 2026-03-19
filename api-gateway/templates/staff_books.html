@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Quản lý sách | BookStore{% endblock %}
 
@@ -257,6 +257,57 @@
   <div class="staff-header">
     <h2><i class="bi bi-gear-fill"></i> Quản lý sách</h2>
     <p>Dashboard quản trị - Thêm, sửa, xóa sách trong hệ thống</p>
+  </div>
+
+  <style>
+    .staff-tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 32px;
+      background: var(--card-bg);
+      padding: 8px;
+      border-radius: 18px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+    }
+
+    .staff-tab {
+      flex: 1;
+      text-align: center;
+      padding: 14px 20px;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .staff-tab:hover {
+      background: rgba(102, 126, 234, 0.08);
+      color: var(--brand-primary);
+      text-decoration: none;
+    }
+
+    .staff-tab.active {
+      background: var(--gradient-primary);
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.35);
+    }
+  </style>
+
+  <!-- Tab Navigation -->
+  <div class="staff-tabs">
+    <a href="{% url 'staff_books' %}" class="staff-tab active">
+      <i class="bi bi-book-half"></i> Quản lý sách
+    </a>
+    <a href="{% url 'staff_orders' %}" class="staff-tab">
+      <i class="bi bi-receipt"></i> Quản lý đơn hàng
+    </a>
   </div>
 
   <div class="stats-row">

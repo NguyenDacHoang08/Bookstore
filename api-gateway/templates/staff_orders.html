@@ -1,0 +1,487 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý đơn hàng | BookStore{% endblock %}
+
+{% block content %}
+  <style>
+    .staff-header {
+      background: var(--gradient-sunset);
+      color: white;
+      border-radius: 24px;
+      padding: 40px;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .staff-header::before {
+      content: '';
+      position: absolute;
+      bottom: -50%;
+      right: -20%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .staff-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .staff-header p {
+      font-size: 1.1rem;
+      opacity: 0.95;
+      margin: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Tab Navigation */
+    .staff-tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 32px;
+      background: var(--card-bg);
+      padding: 8px;
+      border-radius: 18px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+    }
+
+    .staff-tab {
+      flex: 1;
+      text-align: center;
+      padding: 14px 20px;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .staff-tab:hover {
+      background: rgba(102, 126, 234, 0.08);
+      color: var(--brand-primary);
+      text-decoration: none;
+    }
+
+    .staff-tab.active {
+      background: var(--gradient-primary);
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.35);
+    }
+
+    /* Stats */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%);
+      border-radius: 16px;
+      padding: 25px;
+      border: 1px solid var(--border-color);
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    /* Orders Table Section */
+    .orders-section {
+      background: var(--card-bg);
+      border-radius: 24px;
+      padding: 35px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-color);
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    .section-title {
+      font-weight: 800;
+      font-size: 1.5rem;
+      margin-bottom: 25px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-title i {
+      color: var(--brand-primary);
+      font-size: 1.8rem;
+    }
+
+    .orders-table thead {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+
+    .orders-table thead th {
+      padding: 18px 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 0.8rem;
+      color: var(--text-primary);
+      border: none;
+      white-space: nowrap;
+    }
+
+    .orders-table tbody td {
+      padding: 18px 14px;
+      vertical-align: middle;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .orders-table tbody tr {
+      transition: all 0.2s ease;
+    }
+
+    .orders-table tbody tr:hover {
+      background: rgba(102, 126, 234, 0.03);
+    }
+
+    .order-id-badge {
+      background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+      color: #1e40af;
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      border: 1px solid #93c5fd;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+
+    .status-confirmed {
+      background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+      color: #065f46;
+      border: 1px solid #6ee7b7;
+    }
+
+    .status-processing {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      color: #92400e;
+      border: 1px solid #fcd34d;
+    }
+
+    .status-pending {
+      background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+      color: #3730a3;
+      border: 1px solid #a5b4fc;
+    }
+
+    .status-failed {
+      background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+    }
+
+    .status-cancelled {
+      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+      color: #374151;
+      border: 1px solid #d1d5db;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: nowrap;
+    }
+
+    .btn-approve {
+      padding: 9px 16px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+      color: #065f46;
+      border: 1px solid #6ee7b7;
+      font-weight: 700;
+      font-size: 0.82rem;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .btn-approve:hover {
+      background: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-approve:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-delete {
+      padding: 9px 16px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+      font-weight: 700;
+      font-size: 0.82rem;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .btn-delete:hover {
+      background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+      transform: translateY(-2px);
+    }
+
+    .customer-chip {
+      background: linear-gradient(135deg, rgba(102,126,234,0.12) 0%, rgba(236,72,153,0.12) 100%);
+      color: var(--brand-primary);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.82rem;
+    }
+
+    .amount-text {
+      font-weight: 800;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+    }
+
+    .order-items-info {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      color: var(--text-secondary);
+      opacity: 0.2;
+      display: block;
+      margin-bottom: 20px;
+    }
+
+    .empty-state p {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+    }
+
+    .date-text {
+      font-size: 0.83rem;
+      color: var(--text-secondary);
+    }
+
+    .payment-info {
+      font-size: 0.82rem;
+    }
+
+    .method-badge {
+      background: rgba(102, 126, 234, 0.08);
+      color: var(--brand-primary);
+      padding: 3px 10px;
+      border-radius: 8px;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+    }
+  </style>
+
+  <div class="staff-header">
+    <h2><i class="bi bi-cart-check-fill"></i> Quản lý đơn hàng</h2>
+    <p>Dashboard quản trị - Xem, duyệt và xóa đơn hàng của khách hàng</p>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="staff-tabs">
+    <a href="{% url 'staff_books' %}" class="staff-tab">
+      <i class="bi bi-book-half"></i> Quản lý sách
+    </a>
+    <a href="{% url 'staff_orders' %}" class="staff-tab active">
+      <i class="bi bi-receipt"></i> Quản lý đơn hàng
+    </a>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value">{{ orders|length }}</div>
+      <div class="stat-label"><i class="bi bi-receipt"></i> Tổng đơn hàng</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ orders|length }}</div>
+      <div class="stat-label"><i class="bi bi-people"></i> Khách hàng đặt</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value"><i class="bi bi-check-circle-fill" style="font-size:1.8rem;"></i></div>
+      <div class="stat-label"><i class="bi bi-patch-check"></i> Duyệt đơn ngay</div>
+    </div>
+  </div>
+
+  <!-- Orders Table -->
+  <div class="orders-section">
+    <h5 class="section-title"><i class="bi bi-list-check"></i> Danh sách đơn hàng</h5>
+
+    <div class="table-responsive">
+      <table class="table orders-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Khách hàng</th>
+            <th>Sản phẩm</th>
+            <th>Tổng tiền</th>
+            <th>Thanh toán</th>
+            <th>Vận chuyển</th>
+            <th>Trạng thái</th>
+            <th>Ngày đặt</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in orders %}
+            <tr>
+              <td>
+                <span class="order-id-badge">#{{ order.id }}</span>
+              </td>
+              <td>
+                <span class="customer-chip"><i class="bi bi-person"></i> KH #{{ order.customer_id }}</span>
+              </td>
+              <td>
+                <div style="font-weight: 600; font-size: 0.9rem;">{{ order.items|length }} sản phẩm</div>
+                {% for item in order.items|slice:":2" %}
+                  <div class="order-items-info">{{ item.title }} × {{ item.quantity }}</div>
+                {% endfor %}
+                {% if order.items|length > 2 %}
+                  <div class="order-items-info" style="font-style: italic;">+{{ order.items|length|add:"-2" }} sản phẩm khác</div>
+                {% endif %}
+              </td>
+              <td>
+                <div class="amount-text">${{ order.total_amount }}</div>
+              </td>
+              <td>
+                <div class="payment-info">
+                  <span class="method-badge">{{ order.payment_method }}</span>
+                  <div style="margin-top: 4px; font-size: 0.78rem;">
+                    {% if order.payment_status == 'paid' %}
+                      <span style="color: #059669;"><i class="bi bi-check-circle-fill"></i> Đã TT</span>
+                    {% elif order.payment_status == 'failed' %}
+                      <span style="color: #dc2626;"><i class="bi bi-x-circle-fill"></i> Thất bại</span>
+                    {% else %}
+                      <span style="color: #d97706;"><i class="bi bi-hourglass-split"></i> {{ order.payment_status }}</span>
+                    {% endif %}
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="payment-info">
+                  <span class="method-badge">{{ order.shipping_method }}</span>
+                  <div style="margin-top: 4px; font-size: 0.78rem; color: var(--text-secondary);">
+                    {{ order.shipping_status }}
+                  </div>
+                </div>
+              </td>
+              <td>
+                {% if order.status == 'confirmed' %}
+                  <span class="status-badge status-confirmed"><i class="bi bi-check-circle-fill"></i> Đã duyệt</span>
+                {% elif order.status == 'processing' %}
+                  <span class="status-badge status-processing"><i class="bi bi-hourglass-split"></i> Đang xử lý</span>
+                {% elif order.status == 'pending' %}
+                  <span class="status-badge status-pending"><i class="bi bi-clock"></i> Chờ xử lý</span>
+                {% elif order.status == 'failed' %}
+                  <span class="status-badge status-failed"><i class="bi bi-x-circle-fill"></i> Thất bại</span>
+                {% elif order.status == 'cancelled' %}
+                  <span class="status-badge status-cancelled"><i class="bi bi-dash-circle"></i> Đã hủy</span>
+                {% else %}
+                  <span class="status-badge status-pending">{{ order.status }}</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="date-text">
+                  {{ order.created_at|date:"d/m/Y" }}<br>
+                  <span style="opacity: 0.7;">{{ order.created_at|date:"H:i" }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <!-- Approve -->
+                  <form method="post" action="{% url 'staff_order_approve' order.id %}">
+                    {% csrf_token %}
+                    <button
+                      type="submit"
+                      class="btn-approve"
+                      {% if order.status == 'confirmed' %}disabled title="Đã duyệt"{% endif %}
+                      {% if order.status != 'confirmed' %}onclick="return confirm('Duyệt đơn hàng #{{ order.id }}?')"{% endif %}
+                    >
+                      <i class="bi bi-check-lg"></i> Duyệt
+                    </button>
+                  </form>
+                  <!-- Delete -->
+                  <form method="post" action="{% url 'staff_order_delete' order.id %}">
+                    {% csrf_token %}
+                    <button
+                      type="submit"
+                      class="btn-delete"
+                      onclick="return confirm('Bạn có chắc muốn xóa đơn hàng #{{ order.id }}? Hành động này không thể hoàn tác!')"
+                    >
+                      <i class="bi bi-trash"></i> Xóa
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="9">
+                <div class="empty-state">
+                  <i class="bi bi-inbox"></i>
+                  <p>Chưa có đơn hàng nào trong hệ thống</p>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}
