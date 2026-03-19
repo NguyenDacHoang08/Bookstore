@@ -178,7 +178,7 @@ def register(request):
         payload = {
             "name": name,
             "email": email,
-            "password": make_password(password) if password else "",
+            "password": password if password else "",
         }
 
         try:
