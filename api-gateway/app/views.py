@@ -748,6 +748,208 @@ def staff_book_delete(request, book_id):
     return redirect("staff_books")
 
 
+def staff_orders(request):
+    """Trang quản lý đơn hàng cho staff"""
+    if not request.session.get("is_staff"):
+        messages.error(request, "Bạn cần đăng nhập staff để quản lý đơn hàng.")
+        return redirect("login")
+
+    # Lấy filter từ query params
+    status_filter = request.GET.get("status", "pending")
+    
+    try:
+        if status_filter == "pending":
+            # Lấy đơn hàng chờ duyệt
+            response = requests.get(
+                f"{ORDER_SERVICE_URL}/orders/pending/",
+                timeout=3,
+            )
+        else:
+            # Lấy tất cả đơn hàng và filter theo status
+            response = requests.get(
+                f"{ORDER_SERVICE_URL}/orders/",
+                timeout=3,
+            )
+    except requests.RequestException:
+        messages.error(request, "order-service unavailable")
+        return redirect("staff_books")
+
+    if response.status_code != 200:
+        messages.error(request, "Không thể lấy danh sách đơn hàng.")
+        return redirect("staff_books")
+
+    orders = _safe_json(response) or []
+    
+    # Filter orders nếu không phải pending
+    if status_filter != "pending" and status_filter != "all":
+        orders = [order for order in orders if order.get("status") == status_filter]
+
+    context = {
+        **_base_context(request),
+        "orders": orders,
+        "status_filter": status_filter,
+        "status_options": [
+            {"value": "pending", "label": "Chờ duyệt"},
+            {"value": "all", "label": "Tất cả"},
+            {"value": "processing", "label": "Đang xử lý"},
+            {"value": "confirmed", "label": "Đã xác nhận"},
+            {"value": "shipped", "label": "Đã giao vận"},
+            {"value": "delivered", "label": "Đã giao hàng"},
+            {"value": "cancelled", "label": "Đã hủy"},
+        ]
+    }
+    return render(request, "staff_orders.html", context)
+
+
+def staff_order_detail(request, order_id):
+    """Chi tiết đơn hàng cho staff"""
+    if not request.session.get("is_staff"):
+        messages.error(request, "Bạn cần đăng nhập staff để quản lý đơn hàng.")
+        return redirect("login")
+
+    try:
+        response = requests.get(
+            f"{ORDER_SERVICE_URL}/orders/{order_id}/approval/",
+            timeout=3,
+        )
+    except requests.RequestException:
+        messages.error(request, "order-service unavailable")
+        return redirect("staff_orders")
+
+    if response.status_code == 404:
+        messages.error(request, "Không tìm thấy đơn hàng.")
+        return redirect("staff_orders")
+
+    if response.status_code != 200:
+        messages.error(request, "Không thể lấy thông tin đơn hàng.")
+        return redirect("staff_orders")
+
+    order = _safe_json(response) or {}
+    
+    context = {
+        **_base_context(request),
+        "order": order,
+        "approval_status_options": [
+            {"value": "pending", "label": "Chờ duyệt"},
+            {"value": "approved", "label": "Đã duyệt"},
+            {"value": "rejected", "label": "Đã từ chối"},
+        ],
+        "order_status_options": [
+            {"value": "pending", "label": "Chờ xử lý"},
+            {"value": "processing", "label": "Đang xử lý"},
+            {"value": "confirmed", "label": "Đã xác nhận"},
+            {"value": "shipped", "label": "Đã giao vận"},
+            {"value": "delivered", "label": "Đã giao hàng"},
+            {"value": "cancelled", "label": "Đã hủy"},
+            {"value": "failed", "label": "Thất bại"},
+        ]
+    }
+    return render(request, "staff_order_detail.html", context)
+
+
+def staff_order_approve(request, order_id):
+    """Duyệt đơn hàng"""
+    if request.method != "POST":
+        return redirect("staff_order_detail", order_id=order_id)
+
+    if not request.session.get("is_staff"):
+        messages.error(request, "Bạn cần đăng nhập staff để duyệt đơn hàng.")
+        return redirect("login")
+
+    action = request.POST.get("action", "").strip()
+    staff_id = request.session.get("customer_id")  # staff_id stored in customer_id session
+    
+    if not staff_id:
+        messages.error(request, "Không thể xác định staff.")
+        return redirect("staff_order_detail", order_id=order_id)
+
+    payload = {
+        "action": action,
+        "staff_id": staff_id,
+    }
+
+    if action == "approve":
+        tracking_number = request.POST.get("tracking_number", "").strip()
+        estimated_delivery = request.POST.get("estimated_delivery", "").strip()
+        notes = request.POST.get("notes", "").strip()
+        
+        if tracking_number:
+            payload["tracking_number"] = tracking_number
+        if estimated_delivery:
+            payload["estimated_delivery"] = estimated_delivery
+        if notes:
+            payload["notes"] = notes
+            
+    elif action == "reject":
+        rejection_reason = request.POST.get("rejection_reason", "").strip()
+        if rejection_reason:
+            payload["rejection_reason"] = rejection_reason
+
+    try:
+        response = requests.post(
+            f"{ORDER_SERVICE_URL}/orders/{order_id}/approval/",
+            json=payload,
+            timeout=3,
+        )
+    except requests.RequestException:
+        messages.error(request, "order-service unavailable")
+        return redirect("staff_order_detail", order_id=order_id)
+
+    if response.status_code == 200:
+        if action == "approve":
+            messages.success(request, "Đã duyệt đơn hàng thành công.")
+        else:
+            messages.success(request, "Đã từ chối đơn hàng.")
+    else:
+        error_data = _safe_json(response)
+        error_msg = error_data.get("error") if isinstance(error_data, dict) else "Không thể xử lý đơn hàng."
+        messages.error(request, error_msg)
+
+    return redirect("staff_order_detail", order_id=order_id)
+
+
+def staff_order_update(request, order_id):
+    """Cập nhật thông tin đơn hàng"""
+    if request.method != "POST":
+        return redirect("staff_order_detail", order_id=order_id)
+
+    if not request.session.get("is_staff"):
+        messages.error(request, "Bạn cần đăng nhập staff để cập nhật đơn hàng.")
+        return redirect("login")
+
+    payload = {}
+    
+    # Các trường có thể cập nhật
+    fields = ["status", "tracking_number", "estimated_delivery", "notes"]
+    for field in fields:
+        value = request.POST.get(field, "").strip()
+        if value:
+            payload[field] = value
+
+    if not payload:
+        messages.warning(request, "Không có thông tin nào để cập nhật.")
+        return redirect("staff_order_detail", order_id=order_id)
+
+    try:
+        response = requests.patch(
+            f"{ORDER_SERVICE_URL}/orders/{order_id}/approval/",
+            json=payload,
+            timeout=3,
+        )
+    except requests.RequestException:
+        messages.error(request, "order-service unavailable")
+        return redirect("staff_order_detail", order_id=order_id)
+
+    if response.status_code == 200:
+        messages.success(request, "Đã cập nhật thông tin đơn hàng.")
+    else:
+        error_data = _safe_json(response)
+        error_msg = error_data.get("error") if isinstance(error_data, dict) else "Không thể cập nhật đơn hàng."
+        messages.error(request, error_msg)
+
+    return redirect("staff_order_detail", order_id=order_id)
+
+
 def _proxy_headers(request):
     headers = {}
     for key, value in request.headers.items():

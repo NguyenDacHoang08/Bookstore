@@ -124,3 +124,36 @@ Thumbs.db
 
 # Temporary files
 tmp_test.txt
+
+# Docker
+.docker/
+docker-compose.override.yml
+.dockerignore
+
+# Development
+*.dev
+*.local
+.env.local
+.env.development
+
+# Logs
+logs/
+*.log
+
+# Database backups
+*.sql
+*.dump
+
+# Test files
+test_*.py
+*_test.py
+test_output/
+
+# Coverage
+.coverage
+htmlcov/
+
+# Temporary development files
+temp/
+tmp/
+scratch/

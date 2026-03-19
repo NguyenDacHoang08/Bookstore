@@ -1,10 +1,14 @@
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from django.db import transaction
+from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Order, OrderItem
-from .serializers import OrderSerializer
+from .serializers import (
+    OrderSerializer, OrderTrackingSerializer, 
+    OrderApprovalSerializer, ApprovalActionSerializer
+)
 import requests
 
 PAY_SERVICE_URL = "http://pay-service:8000"
@@ -357,4 +361,169 @@ class OrderDetail(APIView):
         if not order:
             return Response({"error": "Order not found"}, status=status.HTTP_404_NOT_FOUND)
         serializer = OrderSerializer(order)
+        return Response(serializer.data)
+
+
+class OrderTracking(APIView):
+    """API cho customer theo dõi đơn hàng"""
+    
+    def get(self, request, order_id=None, customer_id=None):
+        if order_id:
+            # Lấy thông tin theo dõi của một đơn hàng cụ thể
+            order = Order.objects.filter(id=order_id).prefetch_related("items").first()
+            if not order:
+                return Response(
+                    {"error": "Order not found"}, 
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Kiểm tra quyền truy cập (customer chỉ xem được đơn hàng của mình)
+            customer_id_param = request.query_params.get("customer_id")
+            if customer_id_param:
+                try:
+                    customer_id_param = int(customer_id_param)
+                    if order.customer_id != customer_id_param:
+                        return Response(
+                            {"error": "Access denied"}, 
+                            status=status.HTTP_403_FORBIDDEN
+                        )
+                except (TypeError, ValueError):
+                    return Response(
+                        {"error": "Invalid customer_id"}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
+            serializer = OrderTrackingSerializer(order)
+            return Response(serializer.data)
+            
+        elif customer_id:
+            # Lấy tất cả đơn hàng của customer
+            orders = Order.objects.filter(customer_id=customer_id).order_by("-created_at").prefetch_related("items")
+            serializer = OrderTrackingSerializer(orders, many=True)
+            return Response(serializer.data)
+        
+        return Response(
+            {"error": "Either order_id or customer_id is required"}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+class PendingOrdersList(APIView):
+    """API lấy danh sách đơn hàng chờ duyệt cho staff"""
+    
+    def get(self, request):
+        # Lấy các đơn hàng chờ duyệt
+        orders = Order.objects.filter(
+            approval_status="pending"
+        ).order_by("created_at").prefetch_related("items")
+        
+        # Lọc theo trạng thái nếu có
+        status_filter = request.query_params.get("status")
+        if status_filter:
+            orders = orders.filter(status=status_filter)
+        
+        serializer = OrderApprovalSerializer(orders, many=True)
+        return Response(serializer.data)
+
+
+class OrderApproval(APIView):
+    """API cho staff duyệt/từ chối đơn hàng"""
+    
+    def get(self, request, order_id):
+        """Lấy thông tin chi tiết đơn hàng để duyệt"""
+        order = Order.objects.filter(id=order_id).prefetch_related("items").first()
+        if not order:
+            return Response(
+                {"error": "Order not found"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = OrderApprovalSerializer(order)
+        return Response(serializer.data)
+    
+    def post(self, request, order_id):
+        """Duyệt hoặc từ chối đơn hàng"""
+        order = Order.objects.filter(id=order_id).first()
+        if not order:
+            return Response(
+                {"error": "Order not found"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Kiểm tra đơn hàng có thể duyệt được không
+        if order.approval_status != "pending":
+            return Response(
+                {"error": f"Order already {order.approval_status}"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        serializer = ApprovalActionSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        action = serializer.validated_data["action"]
+        staff_id = serializer.validated_data["staff_id"]
+        
+        with transaction.atomic():
+            if action == "approve":
+                order.approval_status = "approved"
+                order.approved_by = staff_id
+                order.approved_at = timezone.now()
+                order.status = "processing"  # Chuyển sang trạng thái xử lý
+                
+                # Cập nhật thông tin theo dõi nếu có
+                if "tracking_number" in serializer.validated_data:
+                    order.tracking_number = serializer.validated_data["tracking_number"]
+                if "estimated_delivery" in serializer.validated_data:
+                    order.estimated_delivery = serializer.validated_data["estimated_delivery"]
+                if "notes" in serializer.validated_data:
+                    order.notes = serializer.validated_data["notes"]
+                
+            elif action == "reject":
+                order.approval_status = "rejected"
+                order.approved_by = staff_id
+                order.approved_at = timezone.now()
+                order.status = "cancelled"  # Chuyển sang trạng thái hủy
+                order.rejection_reason = serializer.validated_data.get("rejection_reason", "")
+                
+                # Hoàn trả stock khi từ chối đơn hàng
+                for item in order.items.all():
+                    _adjust_book_stock(item.book_id, item.quantity)
+            
+            order.save()
+        
+        response_serializer = OrderApprovalSerializer(order)
+        return Response(response_serializer.data)
+    
+    def patch(self, request, order_id):
+        """Cập nhật thông tin theo dõi đơn hàng"""
+        order = Order.objects.filter(id=order_id).first()
+        if not order:
+            return Response(
+                {"error": "Order not found"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Chỉ cho phép cập nhật các trường theo dõi
+        allowed_fields = ["tracking_number", "estimated_delivery", "notes", "status"]
+        updated = False
+        
+        for field in allowed_fields:
+            if field in request.data:
+                if field == "status":
+                    # Kiểm tra trạng thái hợp lệ
+                    valid_statuses = [choice[0] for choice in Order.ORDER_STATUS_CHOICES]
+                    if request.data[field] not in valid_statuses:
+                        return Response(
+                            {"error": f"Invalid status. Valid choices: {valid_statuses}"}, 
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                
+                setattr(order, field, request.data[field])
+                updated = True
+        
+        if updated:
+            order.save()
+        
+        serializer = OrderApprovalSerializer(order)
         return Response(serializer.data)

@@ -38,6 +38,10 @@ urlpatterns = [
     path("staff/books/create/", views.staff_book_create, name="staff_book_create"),
     path("staff/books/<int:book_id>/update/", views.staff_book_update, name="staff_book_update"),
     path("staff/books/<int:book_id>/delete/", views.staff_book_delete, name="staff_book_delete"),
+    path("staff/orders/", views.staff_orders, name="staff_orders"),
+    path("staff/orders/<int:order_id>/", views.staff_order_detail, name="staff_order_detail"),
+    path("staff/orders/<int:order_id>/approve/", views.staff_order_approve, name="staff_order_approve"),
+    path("staff/orders/<int:order_id>/update/", views.staff_order_update, name="staff_order_update"),
     path("api/<str:service>/", views.api_proxy, name="api_proxy_root"),
     path("api/<str:service>/<path:resource_path>/", views.api_proxy, name="api_proxy"),
 ]

@@ -1,0 +1,383 @@
+{% extends "base.html" %}
+
+{% block title %}Chi tiết đơn hàng #{{ order.id }} - Staff{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2>
+                        <i class="fas fa-file-invoice"></i>
+                        Chi tiết đơn hàng #{{ order.id }}
+                    </h2>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'staff_orders' %}">Quản lý đơn hàng</a></li>
+                            <li class="breadcrumb-item active">Đơn hàng #{{ order.id }}</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div class="btn-group">
+                    <a href="{% url 'staff_orders' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Order Info -->
+                <div class="col-md-8">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Thông tin đơn hàng</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <td><strong>Mã đơn hàng:</strong></td>
+                                            <td>#{{ order.id }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Khách hàng ID:</strong></td>
+                                            <td>{{ order.customer_id }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Tổng tiền:</strong></td>
+                                            <td><strong class="text-success">{{ order.total_amount|floatformat:0 }}đ</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Phương thức thanh toán:</strong></td>
+                                            <td>{{ order.payment_method }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Phương thức vận chuyển:</strong></td>
+                                            <td>{{ order.shipping_method }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <td><strong>Ngày tạo:</strong></td>
+                                            <td>{{ order.created_at|date:"d/m/Y H:i" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Cập nhật lần cuối:</strong></td>
+                                            <td>{{ order.updated_at|date:"d/m/Y H:i" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Trạng thái thanh toán:</strong></td>
+                                            <td>
+                                                <span class="badge bg-{% if order.payment_status == 'paid' %}success{% else %}warning{% endif %}">
+                                                    {{ order.payment_status }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Trạng thái vận chuyển:</strong></td>
+                                            <td>
+                                                <span class="badge bg-info">{{ order.shipping_status }}</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Địa chỉ giao hàng:</strong></td>
+                                            <td>{{ order.shipping_address }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Items -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Sản phẩm đặt hàng</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Sản phẩm</th>
+                                            <th>Đơn giá</th>
+                                            <th>Số lượng</th>
+                                            <th>Thành tiền</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in order.items %}
+                                            <tr>
+                                                <td>
+                                                    <div>
+                                                        <strong>{{ item.title }}</strong>
+                                                    </div>
+                                                    <small class="text-muted">{{ item.author }}</small>
+                                                </td>
+                                                <td>{{ item.unit_price|floatformat:0 }}đ</td>
+                                                <td>{{ item.quantity }}</td>
+                                                <td><strong>{{ item.line_total|floatformat:0 }}đ</strong></td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot class="table-light">
+                                        <tr>
+                                            <th colspan="3">Tổng cộng:</th>
+                                            <th><strong class="text-success">{{ order.total_amount|floatformat:0 }}đ</strong></th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions Panel -->
+                <div class="col-md-4">
+                    <!-- Approval Status -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Trạng thái duyệt</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                {% if order.approval_status == 'pending' %}
+                                    <span class="badge bg-warning fs-6">Chờ duyệt</span>
+                                {% elif order.approval_status == 'approved' %}
+                                    <span class="badge bg-success fs-6">Đã duyệt</span>
+                                {% elif order.approval_status == 'rejected' %}
+                                    <span class="badge bg-danger fs-6">Đã từ chối</span>
+                                {% endif %}
+                            </div>
+
+                            {% if order.approved_by %}
+                                <p><strong>Duyệt bởi:</strong> Staff #{{ order.approved_by }}</p>
+                                <p><strong>Thời gian:</strong> {{ order.approved_at|date:"d/m/Y H:i" }}</p>
+                            {% endif %}
+
+                            {% if order.rejection_reason %}
+                                <div class="alert alert-danger">
+                                    <strong>Lý do từ chối:</strong><br>
+                                    {{ order.rejection_reason }}
+                                </div>
+                            {% endif %}
+
+                            <!-- Approval Actions -->
+                            {% if order.approval_status == 'pending' %}
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveModal">
+                                        <i class="fas fa-check"></i> Duyệt đơn hàng
+                                    </button>
+                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                                        <i class="fas fa-times"></i> Từ chối đơn hàng
+                                    </button>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Order Status -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Trạng thái đơn hàng</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                {% if order.status == 'pending' %}
+                                    <span class="badge bg-secondary fs-6">Chờ xử lý</span>
+                                {% elif order.status == 'processing' %}
+                                    <span class="badge bg-info fs-6">Đang xử lý</span>
+                                {% elif order.status == 'confirmed' %}
+                                    <span class="badge bg-primary fs-6">Đã xác nhận</span>
+                                {% elif order.status == 'shipped' %}
+                                    <span class="badge bg-warning fs-6">Đã giao vận</span>
+                                {% elif order.status == 'delivered' %}
+                                    <span class="badge bg-success fs-6">Đã giao hàng</span>
+                                {% elif order.status == 'cancelled' %}
+                                    <span class="badge bg-danger fs-6">Đã hủy</span>
+                                {% elif order.status == 'failed' %}
+                                    <span class="badge bg-dark fs-6">Thất bại</span>
+                                {% endif %}
+                            </div>
+
+                            <button type="button" class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#updateModal">
+                                <i class="fas fa-edit"></i> Cập nhật trạng thái
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tracking Info -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Thông tin theo dõi</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if order.tracking_number %}
+                                <p><strong>Mã vận đơn:</strong><br>
+                                <code>{{ order.tracking_number }}</code></p>
+                            {% endif %}
+
+                            {% if order.estimated_delivery %}
+                                <p><strong>Dự kiến giao hàng:</strong><br>
+                                {{ order.estimated_delivery|date:"d/m/Y H:i" }}</p>
+                            {% endif %}
+
+                            {% if order.notes %}
+                                <p><strong>Ghi chú:</strong><br>
+                                {{ order.notes }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Approve Modal -->
+<div class="modal fade" id="approveModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{% url 'staff_order_approve' order.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="approve">
+                <div class="modal-header">
+                    <h5 class="modal-title">Duyệt đơn hàng #{{ order.id }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="tracking_number" class="form-label">Mã vận đơn (tùy chọn)</label>
+                        <input type="text" class="form-control" id="tracking_number" name="tracking_number" 
+                               placeholder="Nhập mã vận đơn">
+                    </div>
+                    <div class="mb-3">
+                        <label for="estimated_delivery" class="form-label">Dự kiến giao hàng (tùy chọn)</label>
+                        <input type="datetime-local" class="form-control" id="estimated_delivery" name="estimated_delivery">
+                    </div>
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Ghi chú (tùy chọn)</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3" 
+                                  placeholder="Ghi chú về đơn hàng"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check"></i> Duyệt đơn hàng
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{% url 'staff_order_approve' order.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="reject">
+                <div class="modal-header">
+                    <h5 class="modal-title">Từ chối đơn hàng #{{ order.id }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="rejection_reason" class="form-label">Lý do từ chối <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="rejection_reason" name="rejection_reason" rows="4" 
+                                  placeholder="Nhập lý do từ chối đơn hàng" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-times"></i> Từ chối đơn hàng
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Update Modal -->
+<div class="modal fade" id="updateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{% url 'staff_order_update' order.id %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Cập nhật đơn hàng #{{ order.id }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Trạng thái đơn hàng</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="">-- Không thay đổi --</option>
+                            {% for option in order_status_options %}
+                                <option value="{{ option.value }}" 
+                                    {% if option.value == order.status %}selected{% endif %}>
+                                    {{ option.label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="update_tracking_number" class="form-label">Mã vận đơn</label>
+                        <input type="text" class="form-control" id="update_tracking_number" name="tracking_number" 
+                               value="{{ order.tracking_number }}" placeholder="Nhập mã vận đơn">
+                    </div>
+                    <div class="mb-3">
+                        <label for="update_estimated_delivery" class="form-label">Dự kiến giao hàng</label>
+                        <input type="datetime-local" class="form-control" id="update_estimated_delivery" name="estimated_delivery"
+                               value="{% if order.estimated_delivery %}{{ order.estimated_delivery|date:'Y-m-d\TH:i' }}{% endif %}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="update_notes" class="form-label">Ghi chú</label>
+                        <textarea class="form-control" id="update_notes" name="notes" rows="3" 
+                                  placeholder="Ghi chú về đơn hàng">{{ order.notes }}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Cập nhật
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.fs-6 {
+    font-size: 1rem !important;
+}
+
+.table-borderless td {
+    border: none;
+    padding: 0.5rem 0.75rem;
+}
+
+.badge {
+    font-size: 0.875em;
+}
+
+.modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+</style>
+{% endblock %}

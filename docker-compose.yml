@@ -4,58 +4,118 @@ services:
     build: ./customer-service/customer_service
     ports:
       - "8001:8000"
+    volumes:
+      - ./customer-service/customer_service:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=customer_service.settings
+      - PYTHONPATH=/app
 
   book-service:
     build: ./book-service/book_service
     ports:
       - "8002:8000"
+    volumes:
+      - ./book-service/book_service:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=book_service.settings
+      - PYTHONPATH=/app
 
   cart-service:
     build: ./cart-service/cart_service
     ports:
       - "8003:8000"
+    volumes:
+      - ./cart-service/cart_service:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=cart_service.settings
+      - PYTHONPATH=/app
 
   staff-service:
     build: ./staff-service/staff_service
     ports:
       - "8004:8000"
+    volumes:
+      - ./staff-service/staff_service:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=staff_service.settings
+      - PYTHONPATH=/app
 
   manager-service:
     build: ./manager-service/manager_service
     ports:
       - "8005:8000"
+    volumes:
+      - ./manager-service/manager_service:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=manager_service.settings
+      - PYTHONPATH=/app
 
   catalog-service:
     build: ./catalog-service/catalog_service
     ports:
       - "8006:8000"
+    volumes:
+      - ./catalog-service/catalog_service:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=catalog_service.settings
+      - PYTHONPATH=/app
 
   order-service:
     build: ./order-service/order_service
     ports:
       - "8007:8000"
+    volumes:
+      - ./order-service/order_service:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=order_service.settings
+      - PYTHONPATH=/app
 
   ship-service:
     build: ./ship-service/ship_service
     ports:
       - "8008:8000"
+    volumes:
+      - ./ship-service/ship_service:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=ship_service.settings
+      - PYTHONPATH=/app
 
   pay-service:
     build: ./pay-service/pay_service
     ports:
       - "8009:8000"
+    volumes:
+      - ./pay-service/pay_service:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=pay_service.settings
+      - PYTHONPATH=/app
 
   comment-rate-service:
     build: ./comment-rate-service/comment_rate_service
     ports:
       - "8010:8000"
+    volumes:
+      - ./comment-rate-service/comment_rate_service:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=comment_rate_service.settings
+      - PYTHONPATH=/app
 
   recommend-ai-service:
     build: ./recommend-ai-service/recommend_ai_service
     ports:
       - "8011:8000"
+    volumes:
+      - ./recommend-ai-service/recommend_ai_service:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=recommend_ai_service.settings
+      - PYTHONPATH=/app
 
   api-gateway:
     build: ./api-gateway
     ports:
       - "8000:8000"
+    volumes:
+      - ./api-gateway:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=api_gateway.settings
+      - PYTHONPATH=/app
