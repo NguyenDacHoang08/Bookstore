@@ -3,43 +3,280 @@
 {% block title %}{{ book.title }} | BookStore{% endblock %}
 
 {% block content %}
-  <section class="hero mb-4">
+  <style>
+    .breadcrumb {
+      background: transparent;
+      padding: 0;
+      margin-bottom: 30px;
+      font-size: 0.9rem;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+      content: "›";
+      color: var(--text-secondary);
+    }
+
+    .breadcrumb-item a {
+      color: var(--brand-primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .product-section {
+      background: var(--card-bg);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-color);
+      margin-bottom: 40px;
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .product-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 15px;
+      color: var(--text-primary);
+    }
+
+    .product-author {
+      font-size: 1.3rem;
+      color: var(--text-secondary);
+      margin-bottom: 25px;
+      font-weight: 500;
+    }
+
+    .product-badges {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
+
+    .product-badge {
+      padding: 12px 20px;
+      border-radius: 16px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge-price {
+      background: var(--gradient-primary);
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .badge-stock {
+      background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+      color: #065f46;
+      border: 1px solid #6ee7b7;
+    }
+
+    .badge-rating {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      color: #92400e;
+      border: 1px solid #fcd34d;
+    }
+
+    .add-to-cart-section {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 20px;
+      padding: 30px;
+      margin-top: 30px;
+      border: 2px solid var(--border-color);
+    }
+
+    .quantity-control {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .quantity-control label {
+      font-weight: 700;
+      color: var(--text-primary);
+      font-size: 1.1rem;
+    }
+
+    .quantity-control input {
+      width: 100px;
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .btn-add-to-cart-large {
+      width: 100%;
+      padding: 18px;
+      font-size: 1.2rem;
+      font-weight: 800;
+      border-radius: 16px;
+      background: var(--gradient-primary);
+      color: white;
+      border: none;
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .btn-add-to-cart-large:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+    }
+
+    .reviews-section {
+      background: var(--card-bg);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border-color);
+      animation: fadeInUp 0.7s ease-out;
+    }
+
+    .section-title {
+      font-weight: 800;
+      font-size: 1.8rem;
+      margin-bottom: 30px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-title i {
+      color: var(--brand-primary);
+    }
+
+    .review-item {
+      padding: 25px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border: 1px solid var(--border-color);
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .review-item:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateX(5px);
+    }
+
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .reviewer-name {
+      font-weight: 700;
+      color: var(--text-primary);
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .review-rating {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      color: #92400e;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 700;
+      border: 1px solid #fcd34d;
+    }
+
+    .review-comment {
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-bottom: 10px;
+    }
+
+    .review-date {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .rating-form {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%);
+      border-radius: 20px;
+      padding: 35px;
+      border: 2px solid var(--border-color);
+    }
+
+    .recommendations-section {
+      margin-top: 60px;
+      animation: fadeInUp 0.8s ease-out;
+    }
+  </style>
+
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'home' %}"><i class="bi bi-house-door"></i> Trang chủ</a></li>
+      <li class="breadcrumb-item active">{{ book.title }}</li>
+    </ol>
+  </nav>
+
+  <section class="product-section">
     <div class="row g-4">
       <div class="col-lg-4">
         {% if book.image_url %}
-          <img src="{{ book.image_url }}" alt="{{ book.title }}" class="book-detail-image">
+          <img src="{{ book.image_url }}" alt="{{ book.title }}" class="book-detail-image w-100">
         {% else %}
-          <div class="book-detail-placeholder">
-            <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z"/>
-            </svg>
+          <div class="book-detail-placeholder w-100">
+            <i class="bi bi-book"></i>
           </div>
         {% endif %}
       </div>
       <div class="col-lg-8">
-        <h2 class="mb-2">{{ book.title }}</h2>
-        <p class="muted mb-3" style="font-size: 1.1rem;">{{ book.author }}</p>
-        <div class="d-flex gap-3 flex-wrap mb-4">
-          <span class="badge badge-soft" style="font-size: 1.1rem; padding: 8px 16px;">Giá ${{ book.price }}</span>
-          <span class="badge badge-soft" style="font-size: 1.1rem; padding: 8px 16px;">Tồn kho {{ book.stock }}</span>
-          <span class="badge badge-soft" style="font-size: 1.1rem; padding: 8px 16px;">★ {{ book.rating_avg|default_if_none:0|floatformat:1 }} ({{ book.rating_count|default_if_none:0 }} đánh giá)</span>
+        <h1 class="product-title">{{ book.title }}</h1>
+        <p class="product-author"><i class="bi bi-person-circle"></i> {{ book.author }}</p>
+        
+        <div class="product-badges">
+          <span class="product-badge badge-price">
+            <i class="bi bi-tag-fill"></i> ${{ book.price }}
+          </span>
+          <span class="product-badge badge-stock">
+            <i class="bi bi-box-seam"></i> Còn {{ book.stock }} cuốn
+          </span>
+          <span class="product-badge badge-rating">
+            <i class="bi bi-star-fill"></i> {{ book.rating_avg|default_if_none:0|floatformat:1 }} ({{ book.rating_count|default_if_none:0 }} đánh giá)
+          </span>
         </div>
+
         {% if customer_id %}
-          <form method="post" action="{% url 'add_to_cart' %}" class="d-flex gap-2 align-items-center" style="max-width: 400px;">
-            {% csrf_token %}
-            <input type="hidden" name="book_id" value="{{ book.id }}">
-            <input type="hidden" name="customer_id" value="{{ customer_id }}">
-            <label class="me-2 mb-0">Số lượng:</label>
-            <input name="quantity" type="number" min="1" value="1" class="form-control" style="width: 80px;">
-            <button class="btn btn-brand" type="submit">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 6px;">
-                <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
-              </svg>
-              Thêm vào giỏ
-            </button>
-          </form>
+          <div class="add-to-cart-section">
+            <form method="post" action="{% url 'add_to_cart' %}">
+              {% csrf_token %}
+              <input type="hidden" name="book_id" value="{{ book.id }}">
+              <input type="hidden" name="customer_id" value="{{ customer_id }}">
+              <div class="quantity-control">
+                <label for="quantity"><i class="bi bi-123"></i> Số lượng:</label>
+                <input id="quantity" name="quantity" type="number" min="1" value="1" class="form-control">
+              </div>
+              <button class="btn-add-to-cart-large" type="submit">
+                <i class="bi bi-cart-plus-fill"></i> Thêm vào giỏ hàng
+              </button>
+            </form>
+          </div>
         {% else %}
-          <a class="btn btn-brand btn-lg" href="{% url 'login' %}">Đăng nhập để mua</a>
+          <div class="add-to-cart-section text-center">
+            <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 1.1rem;">
+              <i class="bi bi-info-circle"></i> Vui lòng đăng nhập để mua sách
+            </p>
+            <a class="btn btn-accent btn-lg" href="{% url 'login' %}" style="padding: 16px 40px; font-size: 1.1rem;">
+              <i class="bi bi-box-arrow-in-right"></i> Đăng nhập ngay
+            </a>
+          </div>
         {% endif %}
       </div>
     </div>
@@ -47,78 +284,98 @@
 
   <div class="row g-4">
     <div class="col-lg-7">
-      <div class="card-surface p-4">
-        <h5 class="mb-3">Đánh giá từ khách hàng</h5>
+      <div class="reviews-section">
+        <h4 class="section-title"><i class="bi bi-chat-left-quote"></i> Đánh giá từ khách hàng</h4>
         {% if ratings %}
           {% for rating in ratings %}
-            <div class="border-bottom pb-3 mb-3">
-              <div class="d-flex justify-content-between align-items-center">
-                <strong>Khách #{{ rating.customer_id|default:"Ẩn danh" }}</strong>
-                <span class="badge bg-warning-subtle text-warning">★ {{ rating.rating }}</span>
+            <div class="review-item">
+              <div class="review-header">
+                <span class="reviewer-name">
+                  <i class="bi bi-person-circle"></i> Khách hàng #{{ rating.customer_id|default:"Ẩn danh" }}
+                </span>
+                <span class="review-rating">
+                  <i class="bi bi-star-fill"></i> {{ rating.rating }}/5
+                </span>
               </div>
-              <p class="mb-1 mt-2">{{ rating.comment|default:"" }}</p>
-              <small class="muted">{{ rating.created_at }}</small>
+              {% if rating.comment %}
+                <p class="review-comment">{{ rating.comment }}</p>
+              {% endif %}
+              <small class="review-date">
+                <i class="bi bi-clock"></i> {{ rating.created_at }}
+              </small>
             </div>
           {% endfor %}
         {% else %}
-          <p class="muted">Chưa có đánh giá nào cho sách này.</p>
+          <div class="text-center py-5">
+            <i class="bi bi-chat-left-text" style="font-size: 4rem; color: var(--text-secondary); opacity: 0.3;"></i>
+            <p style="color: var(--text-secondary); margin-top: 20px;">Chưa có đánh giá nào cho sách này</p>
+          </div>
         {% endif %}
       </div>
     </div>
     <div class="col-lg-5">
-      <div class="card-surface p-4">
-        <h5 class="mb-3">Gửi đánh giá</h5>
+      <div class="reviews-section">
+        <h5 class="section-title" style="font-size: 1.5rem;"><i class="bi bi-pencil-square"></i> Gửi đánh giá</h5>
         {% if customer_id %}
-          <form method="post" action="{% url 'rate_book' book.id %}">
-            {% csrf_token %}
-            <div class="mb-3">
-              <label class="form-label">Số sao</label>
-              <select name="rating" class="form-select" required>
-                <option value="5">5 - Tuyệt vời</option>
-                <option value="4">4 - Rất tốt</option>
-                <option value="3">3 - Tốt</option>
-                <option value="2">2 - Khá</option>
-                <option value="1">1 - Chưa hài lòng</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Bình luận</label>
-              <textarea name="comment" class="form-control" rows="4" placeholder="Cảm nhận của bạn..."></textarea>
-            </div>
-            <button class="btn btn-brand" type="submit">Gửi đánh giá</button>
-          </form>
+          <div class="rating-form">
+            <form method="post" action="{% url 'rate_book' book.id %}">
+              {% csrf_token %}
+              <div class="mb-4">
+                <label class="form-label"><i class="bi bi-star"></i> Số sao</label>
+                <select name="rating" class="form-select" required>
+                  <option value="5">⭐⭐⭐⭐⭐ 5 - Tuyệt vời</option>
+                  <option value="4">⭐⭐⭐⭐ 4 - Rất tốt</option>
+                  <option value="3">⭐⭐⭐ 3 - Tốt</option>
+                  <option value="2">⭐⭐ 2 - Khá</option>
+                  <option value="1">⭐ 1 - Chưa hài lòng</option>
+                </select>
+              </div>
+              <div class="mb-4">
+                <label class="form-label"><i class="bi bi-chat-left-text"></i> Bình luận</label>
+                <textarea name="comment" class="form-control" rows="5" placeholder="Chia sẻ cảm nhận của bạn về cuốn sách này..."></textarea>
+              </div>
+              <button class="btn btn-brand w-100" type="submit" style="padding: 14px; font-size: 1.1rem;">
+                <i class="bi bi-send"></i> Gửi đánh giá
+              </button>
+            </form>
+          </div>
         {% else %}
-          <p class="muted">Bạn cần đăng nhập để đánh giá.</p>
-          <a class="btn btn-brand" href="{% url 'login' %}">Đăng nhập</a>
+          <div class="rating-form text-center">
+            <i class="bi bi-lock" style="font-size: 3rem; color: var(--text-secondary); opacity: 0.3; margin-bottom: 20px;"></i>
+            <p style="color: var(--text-secondary); margin-bottom: 25px;">Bạn cần đăng nhập để đánh giá sách</p>
+            <a class="btn btn-brand w-100" href="{% url 'login' %}" style="padding: 14px;">
+              <i class="bi bi-box-arrow-in-right"></i> Đăng nhập
+            </a>
+          </div>
         {% endif %}
       </div>
     </div>
   </div>
 
   {% if recommendations %}
-  <section class="mt-5">
-    <h4 class="mb-4">Sách gợi ý cho bạn</h4>
-    <div class="row g-3">
+  <section class="recommendations-section">
+    <h4 class="section-title"><i class="bi bi-lightbulb"></i> Sách gợi ý cho bạn</h4>
+    <div class="row g-4">
       {% for rec in recommendations %}
         <div class="col-md-4 col-lg-3 col-sm-6">
           <div class="book-card h-100">
-            <a href="{% url 'book_detail' rec.id %}" class="book-image-link" style="padding-top: 140%;">
+            <a href="{% url 'book_detail' rec.id %}" class="book-image-link">
               {% if rec.image_url %}
                 <img src="{{ rec.image_url }}" alt="{{ rec.title }}" class="book-image">
               {% else %}
                 <div class="book-image-placeholder">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z"/>
-                  </svg>
+                  <i class="bi bi-book"></i>
                 </div>
               {% endif %}
             </a>
-            <div class="book-content" style="padding: 12px;">
+            <div class="book-content" style="padding: 16px;">
               <a href="{% url 'book_detail' rec.id %}" class="book-title-link">
-                <h6 class="book-title" style="font-size: 0.95rem; min-height: 2.4em;">{{ rec.title }}</h6>
+                <h6 class="book-title" style="font-size: 1rem; min-height: 2.4em;">{{ rec.title }}</h6>
               </a>
-              <p class="book-author" style="font-size: 0.85rem; margin-bottom: 8px;">{{ rec.author }}</p>
-              <div class="book-price" style="font-size: 1.1rem;">${{ rec.price }}</div>
+              <p class="book-author" style="font-size: 0.85rem; margin-bottom: 12px;">
+                <i class="bi bi-person"></i> {{ rec.author }}
+              </p>
+              <div class="book-price" style="font-size: 1.2rem;">${{ rec.price }}</div>
             </div>
           </div>
         </div>

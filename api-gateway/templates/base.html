@@ -6,112 +6,332 @@
   <title>{% block title %}BookStore Gateway{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <style>
     :root {
-      --brand: #1f3b4d;
-      --accent: #e08f62;
-      --sand: #f6f1ea;
-      --card: #ffffff;
-      --ink: #1d1b16;
-      --muted: #6c6a63;
-      --border: #e6ded4;
+      --brand-primary: #0066FF;
+      --brand-secondary: #FF6B35;
+      --brand-dark: #1a1a2e;
+      --brand-light: #f8f9fa;
+      --accent-purple: #8B5CF6;
+      --accent-pink: #EC4899;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --card-bg: #ffffff;
+      --text-primary: #1f2937;
+      --text-secondary: #6b7280;
+      --border-color: #e5e7eb;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 30px rgba(0,0,0,0.12);
+      --shadow-xl: 0 20px 50px rgba(0,0,0,0.15);
+      --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --gradient-warm: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --gradient-cool: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      --gradient-sunset: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
     body {
-      font-family: "Manrope", "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top left, #fff7ee 0%, transparent 45%),
-        radial-gradient(circle at top right, #eaf1f2 0%, transparent 40%),
-        var(--sand);
-      color: var(--ink);
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 10%, rgba(102, 126, 234, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.06) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* Navbar Styles */
+    .navbar {
+      background: rgba(255, 255, 255, 0.95) !important;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: all 0.3s ease;
     }
 
     .navbar-brand {
       font-family: "Playfair Display", serif;
-      font-weight: 700;
-      letter-spacing: 0.3px;
+      font-weight: 800;
+      font-size: 1.5rem;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
     }
 
+    .nav-link {
+      font-weight: 500;
+      color: var(--text-primary) !important;
+      transition: all 0.2s ease;
+      position: relative;
+      padding: 0.5rem 1rem !important;
+    }
+
+    .nav-link:hover {
+      color: var(--brand-primary) !important;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 0;
+      height: 2px;
+      background: var(--gradient-primary);
+      transition: all 0.3s ease;
+      transform: translateX(-50%);
+    }
+
+    .nav-link:hover::after {
+      width: 80%;
+    }
+
+    /* Hero Section */
     .hero {
-      background: var(--card);
-      border: 1px solid var(--border);
+      background: var(--card-bg);
       border-radius: 24px;
-      padding: 24px;
-      box-shadow: 0 12px 30px rgba(31, 59, 77, 0.08);
+      padding: 32px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-color);
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.6s ease-out;
     }
 
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 300px;
+      height: 300px;
+      background: var(--gradient-primary);
+      opacity: 0.05;
+      border-radius: 50%;
+      transform: translate(30%, -30%);
+    }
+
+    /* Card Styles */
     .card-surface {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      box-shadow: 0 12px 24px rgba(20, 37, 53, 0.08);
+      background: var(--card-bg);
+      border-radius: 20px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border-color);
+      transition: all 0.3s ease;
     }
 
+    .card-surface:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-2px);
+    }
+
+    /* Badge Styles */
     .badge-soft {
-      background: #f2e8dd;
-      color: #6c4b39;
-      border: 1px solid #eadbcc;
+      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
       font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 20px;
+    }
+
+    .badge-gradient {
+      background: var(--gradient-primary);
+      color: white;
+      border: none;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 20px;
+    }
+
+    /* Button Styles */
+    .btn {
+      font-weight: 600;
+      border-radius: 12px;
+      padding: 10px 24px;
+      transition: all 0.3s ease;
+      border: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn:hover::before {
+      width: 300px;
+      height: 300px;
     }
 
     .btn-brand {
-      background: var(--brand);
-      border-color: var(--brand);
-      color: #fff;
+      background: var(--gradient-primary);
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
     }
 
     .btn-brand:hover {
-      background: #182f3d;
-      border-color: #182f3d;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      color: white;
     }
 
     .btn-accent {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #1d1b16;
-      font-weight: 600;
+      background: var(--gradient-warm);
+      color: white;
+      box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
     }
 
     .btn-accent:hover {
-      background: #d57948;
-      border-color: #d57948;
-      color: #1d1b16;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+      color: white;
     }
 
+    .btn-outline-secondary {
+      border: 2px solid var(--border-color);
+      color: var(--text-primary);
+      background: transparent;
+    }
+
+    .btn-outline-secondary:hover {
+      background: var(--text-primary);
+      color: white;
+      border-color: var(--text-primary);
+    }
+
+    /* Footer */
     .footer {
-      color: var(--muted);
+      color: var(--text-secondary);
       font-size: 0.9rem;
-      margin-top: 48px;
-      padding: 24px 0 40px;
+      margin-top: 80px;
+      padding: 32px 0;
+      border-top: 1px solid var(--border-color);
+      background: linear-gradient(180deg, transparent 0%, rgba(248, 250, 252, 0.5) 100%);
     }
 
+    /* User Badge */
     .nav-pill {
       border-radius: 999px;
-      padding: 6px 14px;
-      border: 1px solid var(--border);
-      background: #fff;
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
       font-weight: 600;
-      color: var(--brand);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-pill i {
+      font-size: 1.1rem;
     }
 
     .muted {
-      color: var(--muted);
+      color: var(--text-secondary);
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* Alert Styles */
+    .alert {
+      border-radius: 16px;
+      border: none;
+      box-shadow: var(--shadow-sm);
+      animation: slideInRight 0.4s ease-out;
+    }
+
+    .alert-success {
+      background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+      color: #065f46;
+    }
+
+    .alert-danger {
+      background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+      color: #991b1b;
+    }
+
+    .alert-info {
+      background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+      color: #1e40af;
     }
 
     /* Book Card Styles */
     .book-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
       overflow: hidden;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(31, 59, 77, 0.06);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-sm);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
 
     .book-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 28px rgba(31, 59, 77, 0.12);
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-xl);
+      border-color: rgba(102, 126, 234, 0.3);
     }
 
     .book-image-link {
@@ -120,7 +340,7 @@
       width: 100%;
       padding-top: 140%;
       overflow: hidden;
-      background: linear-gradient(135deg, #f8f4ef 0%, #ede7df 100%);
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     }
 
     .book-image {
@@ -130,11 +350,11 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.3s ease;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .book-card:hover .book-image {
-      transform: scale(1.05);
+      transform: scale(1.08);
     }
 
     .book-image-placeholder {
@@ -146,29 +366,35 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--muted);
+      color: var(--text-secondary);
       opacity: 0.3;
+      font-size: 3rem;
     }
 
     .book-badge-container {
       position: absolute;
       top: 12px;
       right: 12px;
+      z-index: 10;
     }
 
     .badge-stock {
       background: rgba(255, 255, 255, 0.95);
-      color: var(--brand);
-      padding: 4px 12px;
+      color: var(--brand-primary);
+      padding: 6px 14px;
       border-radius: 20px;
       font-size: 0.75rem;
-      font-weight: 600;
-      border: 1px solid var(--border);
-      backdrop-filter: blur(8px);
+      font-weight: 700;
+      border: 1px solid rgba(102, 126, 234, 0.2);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
     .book-content {
-      padding: 16px;
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
     }
 
     .book-title-link {
@@ -178,29 +404,31 @@
 
     .book-title {
       font-size: 1.1rem;
-      font-weight: 600;
-      margin: 0 0 6px;
-      line-height: 1.3;
-      color: var(--ink);
+      font-weight: 700;
+      margin: 0 0 8px;
+      line-height: 1.4;
+      color: var(--text-primary);
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      min-height: 2.6em;
+      min-height: 2.8em;
+      transition: color 0.2s ease;
     }
 
     .book-title-link:hover .book-title {
-      color: var(--brand);
+      color: var(--brand-primary);
     }
 
     .book-author {
-      color: var(--muted);
+      color: var(--text-secondary);
       font-size: 0.9rem;
-      margin: 0 0 12px;
+      margin: 0 0 16px;
       display: -webkit-box;
       -webkit-line-clamp: 1;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      font-weight: 500;
     }
 
     .book-meta {
@@ -208,14 +436,17 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
     }
 
     .book-price {
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: var(--brand);
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .book-rating {
@@ -223,27 +454,30 @@
       align-items: center;
       gap: 4px;
       font-size: 0.9rem;
+      font-weight: 600;
     }
 
     .book-rating .star {
-      color: #f59e0b;
+      color: #F59E0B;
       font-size: 1.1rem;
     }
 
     .rating-count {
-      color: var(--muted);
+      color: var(--text-secondary);
       font-size: 0.85rem;
+      font-weight: 500;
     }
 
     .book-actions {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
+      margin-top: auto;
     }
 
     .add-to-cart-form {
       display: flex;
-      gap: 8px;
+      gap: 10px;
     }
 
     .quantity-selector {
@@ -252,105 +486,205 @@
 
     .quantity-input {
       width: 100%;
-      padding: 8px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      padding: 10px;
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
       text-align: center;
-      font-weight: 600;
+      font-weight: 700;
+      color: var(--text-primary);
+      transition: all 0.2s ease;
+    }
+
+    .quantity-input:focus {
+      outline: none;
+      border-color: var(--brand-primary);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
     .btn-add-cart {
       flex: 1;
-      background: var(--brand);
+      background: var(--gradient-primary);
       color: white;
       border: none;
-      border-radius: 8px;
-      padding: 8px 16px;
-      font-weight: 600;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-weight: 700;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.3s ease;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 8px;
       font-size: 0.9rem;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     }
 
     .btn-add-cart:hover {
-      background: #182f3d;
-      transform: translateY(-1px);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-add-cart:active {
+      transform: translateY(0);
     }
 
     .btn-login {
       width: 100%;
-      background: var(--accent);
+      background: var(--gradient-warm);
       color: white;
       border: none;
-      border-radius: 8px;
-      padding: 10px 16px;
-      font-weight: 600;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-weight: 700;
       text-decoration: none;
-      display: block;
-      text-align: center;
-      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(245, 87, 108, 0.3);
     }
 
     .btn-login:hover {
-      background: #d57948;
       color: white;
-      transform: translateY(-1px);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
     }
 
     /* Detail Page Image */
     .book-detail-image {
       width: 100%;
       max-width: 400px;
-      border-radius: 16px;
-      box-shadow: 0 12px 32px rgba(31, 59, 77, 0.15);
+      border-radius: 20px;
+      box-shadow: var(--shadow-xl);
+      transition: transform 0.3s ease;
+    }
+
+    .book-detail-image:hover {
+      transform: scale(1.02);
     }
 
     .book-detail-placeholder {
       width: 100%;
       max-width: 400px;
       aspect-ratio: 2/3;
-      background: linear-gradient(135deg, #f8f4ef 0%, #ede7df 100%);
-      border-radius: 16px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--muted);
+      color: var(--text-secondary);
       opacity: 0.5;
+      font-size: 4rem;
+    }
+
+    /* Form Styles */
+    .form-label {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+
+    .form-control, .form-select {
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px 16px;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+      outline: none;
+      border-color: var(--brand-primary);
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    /* Table Styles */
+    .table {
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .table thead th {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      color: var(--text-primary);
+      font-weight: 700;
+      border: none;
+      padding: 16px;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .table thead th:first-child {
+      border-top-left-radius: 12px;
+    }
+
+    .table thead th:last-child {
+      border-top-right-radius: 12px;
+    }
+
+    .table tbody td {
+      padding: 16px;
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: middle;
+    }
+
+    .table tbody tr {
+      transition: all 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+      background: rgba(102, 126, 234, 0.03);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero {
+        padding: 24px;
+      }
+
+      .book-card {
+        margin-bottom: 20px;
+      }
+
+      .navbar-brand {
+        font-size: 1.3rem;
+      }
     }
   </style>
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top">
+  <nav class="navbar navbar-expand-lg navbar-light sticky-top">
     <div class="container">
-      <a class="navbar-brand" href="{% url 'home' %}">BookStore</a>
+      <a class="navbar-brand" href="{% url 'home' %}">
+        <i class="bi bi-book-half"></i> BookStore
+      </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav me-auto">
-          <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Trang chủ</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'home' %}"><i class="bi bi-house-door"></i> Trang chủ</a></li>
           {% if customer_id %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'cart' %}">Giỏ hàng</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'checkout' %}">Thanh toán</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'orders' %}">Đơn hàng</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'cart' %}"><i class="bi bi-cart3"></i> Giỏ hàng</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'checkout' %}"><i class="bi bi-credit-card"></i> Thanh toán</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'orders' %}"><i class="bi bi-box-seam"></i> Đơn hàng</a></li>
           {% endif %}
           {% if is_staff %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'staff_books' %}">Quản lý sách</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'staff_books' %}"><i class="bi bi-gear"></i> Quản lý sách</a></li>
           {% endif %}
         </ul>
         <div class="d-flex align-items-center gap-2">
           {% if customer_id %}
-            <span class="nav-pill">Xin chào, {{ customer_name|default:"Khách" }}</span>
+            <span class="nav-pill"><i class="bi bi-person-circle"></i> {{ customer_name|default:"Khách" }}</span>
           {% endif %}
           {% if not customer_id and not is_staff %}
-            <a class="btn btn-sm btn-outline-secondary" href="{% url 'login' %}">Đăng nhập</a>
-            <a class="btn btn-sm btn-brand" href="{% url 'register' %}">Đăng ký</a>
+            <a class="btn btn-sm btn-outline-secondary" href="{% url 'login' %}"><i class="bi bi-box-arrow-in-right"></i> Đăng nhập</a>
+            <a class="btn btn-sm btn-brand" href="{% url 'register' %}"><i class="bi bi-person-plus"></i> Đăng ký</a>
           {% else %}
-            <a class="btn btn-sm btn-outline-secondary" href="{% url 'logout' %}">Đăng xuất</a>
+            <a class="btn btn-sm btn-outline-secondary" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>
           {% endif %}
         </div>
       </div>
@@ -371,8 +705,31 @@
   </main>
 
   <footer class="footer">
-    <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
-      <span>BookStore Microservices • API Gateway UI</span>
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-md-4">
+          <h5 style="font-family: 'Playfair Display', serif; font-weight: 700; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+            <i class="bi bi-book-half"></i> BookStore
+          </h5>
+          <p class="mt-3">Hệ thống quản lý sách hiện đại với kiến trúc microservices</p>
+        </div>
+        <div class="col-md-4">
+          <h6 class="fw-bold mb-3">Liên kết nhanh</h6>
+          <ul class="list-unstyled">
+            <li class="mb-2"><a href="{% url 'home' %}" class="text-decoration-none" style="color: var(--text-secondary);">Trang chủ</a></li>
+            <li class="mb-2"><a href="{% url 'login' %}" class="text-decoration-none" style="color: var(--text-secondary);">Đăng nhập</a></li>
+            <li class="mb-2"><a href="{% url 'register' %}" class="text-decoration-none" style="color: var(--text-secondary);">Đăng ký</a></li>
+          </ul>
+        </div>
+        <div class="col-md-4">
+          <h6 class="fw-bold mb-3">Công nghệ</h6>
+          <p>Django • Microservices • REST API • Bootstrap 5</p>
+        </div>
+      </div>
+      <hr class="my-4" style="border-color: var(--border-color);">
+      <div class="text-center">
+        <small>&copy; 2026 BookStore. Microservices Architecture Project.</small>
+      </div>
     </div>
   </footer>
 

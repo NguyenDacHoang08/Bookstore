@@ -3,46 +3,265 @@
 {% block title %}Đăng ký | BookStore{% endblock %}
 
 {% block content %}
-  <section class="hero">
-    <div class="row g-4">
-      <div class="col-lg-6">
-        <h2 class="mb-2">Tạo tài khoản khách hàng</h2>
-        <form method="post" class="row g-3 mt-3">
-          {% csrf_token %}
-          <div class="col-12">
-            <label class="form-label">Họ và tên</label>
-            <input name="name" class="form-control" placeholder="Nguyễn Văn A" required>
+  <style>
+    .register-container {
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 0;
+    }
+
+    .register-card {
+      background: var(--card-bg);
+      border-radius: 24px;
+      box-shadow: var(--shadow-xl);
+      overflow: hidden;
+      max-width: 1100px;
+      width: 100%;
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .register-left {
+      background: var(--gradient-warm);
+      padding: 60px 40px;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .register-left::before {
+      content: '';
+      position: absolute;
+      bottom: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+      animation: float 25s infinite ease-in-out;
+    }
+
+    .register-left h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .register-left p {
+      font-size: 1.1rem;
+      opacity: 0.95;
+      line-height: 1.8;
+      position: relative;
+      z-index: 1;
+    }
+
+    .register-left .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-top: 40px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 20px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+    }
+
+    .stat-item h3 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 5px;
+    }
+
+    .stat-item p {
+      font-size: 0.9rem;
+      opacity: 0.9;
+      margin: 0;
+    }
+
+    .register-right {
+      padding: 50px 45px;
+    }
+
+    .register-right h3 {
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+      font-size: 2rem;
+    }
+
+    .register-right .subtitle {
+      color: var(--text-secondary);
+      margin-bottom: 35px;
+      font-size: 1rem;
+    }
+
+    .form-floating {
+      margin-bottom: 18px;
+    }
+
+    .form-floating input {
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+      height: 58px;
+      transition: all 0.3s ease;
+    }
+
+    .form-floating input:focus {
+      border-color: var(--brand-primary);
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-floating label {
+      padding: 18px 16px;
+      color: var(--text-secondary);
+    }
+
+    .btn-register-submit {
+      width: 100%;
+      padding: 16px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-radius: 12px;
+      background: var(--gradient-warm);
+      border: none;
+      color: white;
+      box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+
+    .btn-register-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+    }
+
+    @media (max-width: 768px) {
+      .register-left {
+        display: none;
+      }
+
+      .register-right {
+        padding: 40px 30px;
+      }
+    }
+  </style>
+
+  <div class="register-container">
+    <div class="register-card">
+      <div class="row g-0">
+        <div class="col-lg-5 register-left">
+          <h2><i class="bi bi-stars"></i> Tham gia cùng chúng tôi!</h2>
+          <p>Tạo tài khoản miễn phí và khám phá thế giới sách đầy màu sắc</p>
+          <div class="stats">
+            <div class="stat-item">
+              <h3>10K+</h3>
+              <p>Đầu sách</p>
+            </div>
+            <div class="stat-item">
+              <h3>50K+</h3>
+              <p>Khách hàng</p>
+            </div>
+            <div class="stat-item">
+              <h3>4.8★</h3>
+              <p>Đánh giá</p>
+            </div>
+            <div class="stat-item">
+              <h3>24/7</h3>
+              <p>Hỗ trợ</p>
+            </div>
           </div>
-          <div class="col-12">
-            <label class="form-label">Email</label>
-            <input name="email" type="email" class="form-control" placeholder="email@domain.com" required>
+        </div>
+        <div class="col-lg-7 register-right">
+          <h3>Tạo tài khoản</h3>
+          <p class="subtitle">Điền thông tin để bắt đầu</p>
+
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-circle"></i> {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+
+          <form method="post">
+            {% csrf_token %}
+            <div class="row g-3">
+              <div class="col-12">
+                <div class="form-floating">
+                  <input type="text" class="form-control" id="name" name="name" placeholder="Họ và tên" required>
+                  <label for="name"><i class="bi bi-person"></i> Họ và tên</label>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="form-floating">
+                  <input type="email" class="form-control" id="email" name="email" placeholder="email@domain.com" required>
+                  <label for="email"><i class="bi bi-envelope"></i> Email</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input type="password" class="form-control" id="password" name="password" placeholder="Mật khẩu" required>
+                  <label for="password"><i class="bi bi-lock"></i> Mật khẩu</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Xác nhận mật khẩu" required>
+                  <label for="confirm_password"><i class="bi bi-lock-fill"></i> Xác nhận</label>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="form-floating">
+                  <input type="text" class="form-control" id="address" name="address" placeholder="Địa chỉ" required>
+                  <label for="address"><i class="bi bi-geo-alt"></i> Địa chỉ</label>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="form-floating">
+                  <input type="tel" class="form-control" id="phone" name="phone" placeholder="Số điện thoại">
+                  <label for="phone"><i class="bi bi-telephone"></i> Số điện thoại (tuỳ chọn)</label>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="terms" required>
+                  <label class="form-check-label" for="terms">
+                    Tôi đồng ý với <a href="#" style="color: var(--brand-primary); text-decoration: none; font-weight: 600;">Điều khoản dịch vụ</a> và <a href="#" style="color: var(--brand-primary); text-decoration: none; font-weight: 600;">Chính sách bảo mật</a>
+                  </label>
+                </div>
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn-register-submit">
+                  <i class="bi bi-person-plus"></i> Tạo tài khoản
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <div class="text-center mt-4">
+            <p style="color: var(--text-secondary);">
+              Đã có tài khoản? 
+              <a href="{% url 'login' %}" style="color: var(--brand-primary); text-decoration: none; font-weight: 700;">
+                Đăng nhập ngay <i class="bi bi-arrow-right"></i>
+              </a>
+            </p>
           </div>
-          <div class="col-md-6">
-            <label class="form-label">Mật khẩu</label>
-            <input name="password" type="password" class="form-control" placeholder="Tối thiểu 6 ký tự">
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Xác nhận mật khẩu</label>
-            <input name="confirm_password" type="password" class="form-control" placeholder="Nhập lại mật khẩu">
-          </div>
-          <div class="col-12">
-            <label class="form-label">Địa chỉ</label>
-            <input name="address" class="form-control" placeholder="Số nhà, đường, quận/huyện">
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Số điện thoại (tuỳ chọn)</label>
-            <input name="phone" class="form-control" placeholder="0909 123 456">
-          </div>
-          <div class="col-12 d-flex gap-2">
-            <button class="btn btn-brand" type="submit">Đăng ký</button>
-            <a class="btn btn-outline-secondary" href="{% url 'login' %}">Đã có tài khoản?</a>
-          </div>
-        </form>
-      </div>
-      <div class="col-lg-6">
-        <div class="card-surface p-4 h-100">
         </div>
       </div>
     </div>
-  </section>
+  </div>
 {% endblock %}

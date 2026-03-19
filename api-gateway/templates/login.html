@@ -3,48 +3,270 @@
 {% block title %}Đăng nhập | BookStore{% endblock %}
 
 {% block content %}
-  <section class="hero">
-    <div class="row g-4">
-      <div class="col-lg-6">
-        <h2 class="mb-2">Đăng nhập</h2>
-        <p class="muted">Nhập email và mật khẩu để đăng nhập.</p>
-        {% if messages %}
-          {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-              {{ message }}
-              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  <style>
+    .login-container {
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-card {
+      background: var(--card-bg);
+      border-radius: 24px;
+      box-shadow: var(--shadow-xl);
+      overflow: hidden;
+      max-width: 1000px;
+      width: 100%;
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .login-left {
+      background: var(--gradient-primary);
+      padding: 60px 40px;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-left::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: float 20s infinite ease-in-out;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      50% { transform: translate(-30px, 30px) rotate(180deg); }
+    }
+
+    .login-left h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .login-left p {
+      font-size: 1.1rem;
+      opacity: 0.95;
+      line-height: 1.8;
+      position: relative;
+      z-index: 1;
+    }
+
+    .login-left .feature-list {
+      list-style: none;
+      padding: 0;
+      margin-top: 30px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .login-left .feature-list li {
+      padding: 12px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1rem;
+    }
+
+    .login-left .feature-list li i {
+      font-size: 1.5rem;
+      opacity: 0.9;
+    }
+
+    .login-right {
+      padding: 60px 50px;
+    }
+
+    .login-right h3 {
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+      font-size: 2rem;
+    }
+
+    .login-right .subtitle {
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+      font-size: 1rem;
+    }
+
+    .form-floating {
+      margin-bottom: 20px;
+    }
+
+    .form-floating input {
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+      height: 60px;
+      transition: all 0.3s ease;
+    }
+
+    .form-floating input:focus {
+      border-color: var(--brand-primary);
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-floating label {
+      padding: 18px 16px;
+      color: var(--text-secondary);
+    }
+
+    .btn-login-submit {
+      width: 100%;
+      padding: 16px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-radius: 12px;
+      background: var(--gradient-primary);
+      border: none;
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+
+    .btn-login-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .divider {
+      text-align: center;
+      margin: 30px 0;
+      position: relative;
+    }
+
+    .divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--border-color);
+    }
+
+    .divider span {
+      background: var(--card-bg);
+      padding: 0 15px;
+      position: relative;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .social-login {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .social-btn {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      background: white;
+      color: var(--text-primary);
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .social-btn:hover {
+      border-color: var(--brand-primary);
+      background: rgba(102, 126, 234, 0.05);
+    }
+
+    @media (max-width: 768px) {
+      .login-left {
+        display: none;
+      }
+
+      .login-right {
+        padding: 40px 30px;
+      }
+    }
+  </style>
+
+  <div class="login-container">
+    <div class="login-card">
+      <div class="row g-0">
+        <div class="col-lg-5 login-left">
+          <h2><i class="bi bi-book-half"></i> Chào mừng trở lại!</h2>
+          <p>Đăng nhập để trải nghiệm hệ thống quản lý sách hiện đại với kiến trúc microservices</p>
+          <ul class="feature-list">
+            <li><i class="bi bi-check-circle-fill"></i> Hàng ngàn đầu sách đa dạng</li>
+            <li><i class="bi bi-check-circle-fill"></i> Thanh toán an toàn & nhanh chóng</li>
+            <li><i class="bi bi-check-circle-fill"></i> Theo dõi đơn hàng realtime</li>
+            <li><i class="bi bi-check-circle-fill"></i> Đánh giá & nhận xét sách</li>
+          </ul>
+        </div>
+        <div class="col-lg-7 login-right">
+          <h3>Đăng nhập</h3>
+          <p class="subtitle">Nhập thông tin tài khoản của bạn</p>
+
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-circle"></i> {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+
+          <form method="post">
+            {% csrf_token %}
+            <div class="form-floating">
+              <input type="email" class="form-control" id="email" name="email" placeholder="email@domain.com" required>
+              <label for="email"><i class="bi bi-envelope"></i> Email</label>
             </div>
-          {% endfor %}
-        {% endif %}
-        <form method="post" class="row g-3 mt-3">
-          {% csrf_token %}
-          <div class="col-12">
-            <label class="form-label">Email</label>
-            <input name="email" type="email" class="form-control" placeholder="email@domain.com" required>
-          </div>
-          <div class="col-12">
-            <label class="form-label">Mật khẩu</label>
-            <input name="password" type="password" class="form-control" placeholder="Nhập mật khẩu" required>
-          </div>
-          <div class="col-12">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="remember" id="remember">
-              <label class="form-check-label" for="remember">Nhớ đăng nhập</label>
+            <div class="form-floating">
+              <input type="password" class="form-control" id="password" name="password" placeholder="Mật khẩu" required>
+              <label for="password"><i class="bi bi-lock"></i> Mật khẩu</label>
             </div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="remember" id="remember">
+                <label class="form-check-label" for="remember">Nhớ đăng nhập</label>
+              </div>
+              <a href="#" style="color: var(--brand-primary); text-decoration: none; font-weight: 600;">Quên mật khẩu?</a>
+            </div>
+            <button type="submit" class="btn-login-submit">
+              <i class="bi bi-box-arrow-in-right"></i> Đăng nhập
+            </button>
+          </form>
+
+          <div class="divider">
+            <span>hoặc</span>
           </div>
-          <div class="col-12 d-flex gap-2">
-            <button class="btn btn-brand" type="submit">Đăng nhập</button>
-            <a class="btn btn-outline-secondary" href="{% url 'register' %}">Tạo tài khoản</a>
+
+          <div class="text-center">
+            <p style="color: var(--text-secondary);">
+              Chưa có tài khoản? 
+              <a href="{% url 'register' %}" style="color: var(--brand-primary); text-decoration: none; font-weight: 700;">
+                Đăng ký ngay <i class="bi bi-arrow-right"></i>
+              </a>
+            </p>
           </div>
-          <div class="col-12">
-            <a href="#">Quên mật khẩu?</a>
-          </div>
-        </form>
-      </div>
-      <div class="col-lg-6">
-        <div class="card-surface p-4 h-100">
         </div>
       </div>
     </div>
-  </section>
+  </div>
 {% endblock %}
